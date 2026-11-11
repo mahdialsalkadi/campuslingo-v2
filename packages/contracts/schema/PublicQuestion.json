@@ -1,0 +1,28 @@
+{
+  "$id": "https://campuslingo.invalid/contracts/1.0.0/PublicQuestion.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "options": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 6,
+      "minItems": 2,
+      "type": "array"
+    },
+    "prompt": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "prompt",
+    "options"
+  ],
+  "title": "PublicQuestion",
+  "type": "object"
+}

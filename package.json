@@ -1,0 +1,32 @@
+{
+  "name": "campuslingo-v2",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22 <23" },
+  "workspaces": ["packages/contracts", "packages/engine"],
+  "scripts": {
+    "contracts:generate": "cargo run --quiet --release -p campuslingo-domain --bin export-contracts && node scripts/generate_types.mjs",
+    "contracts:check": "cargo run --quiet --release -p campuslingo-domain --bin export-contracts -- --check && node scripts/generate_types.mjs --check",
+    "typecheck": "tsc --noEmit",
+    "test:ts": "tsx --test packages/contracts/tests/*.test.ts",
+    "test:rust": "cargo test --workspace",
+    "test:wasm": "node --test packages/engine/tests/*.test.mjs",
+    "test:reference": "uv run pytest",
+    "test": "npm run m0:build && npm run test:rust && npm run contracts:check && npm run typecheck && npm run test:ts && npm run test:wasm",
+    "m0:build": "node scripts/build_m0.mjs",
+    "m0:server-load": "node scripts/benchmark_server.mjs",
+    "m1:verify": "node scripts/run_m1_db_tests.mjs",
+    "m1:load": "node scripts/benchmark_m1.mjs",
+    "m0:environment": "uv run python scripts/collect_environment.py",
+    "m0:corpus": "uv run python scripts/select_corpus.py",
+    "m0:audit": "uv run python scripts/audit_models.py",
+    "m0:parity": "npm run test:wasm"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.11",
+    "json-schema-to-typescript": "16.0.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3"
+  }
+}

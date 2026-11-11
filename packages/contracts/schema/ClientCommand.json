@@ -1,0 +1,91 @@
+{
+  "$defs": {
+    "Version": {
+      "enum": [
+        "1.0.0"
+      ],
+      "type": "string"
+    }
+  },
+  "$id": "https://campuslingo.invalid/contracts/1.0.0/ClientCommand.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "properties": {
+        "card_id": {
+          "type": "string"
+        },
+        "lane": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "match_id": {
+          "type": "string"
+        },
+        "protocol_version": {
+          "$ref": "#/$defs/Version"
+        },
+        "sequence": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "type": {
+          "const": "deploy",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "protocol_version",
+        "match_id",
+        "sequence",
+        "card_id",
+        "lane"
+      ],
+      "type": "object"
+    },
+    {
+      "additionalProperties": false,
+      "properties": {
+        "challenge_id": {
+          "type": "string"
+        },
+        "match_id": {
+          "type": "string"
+        },
+        "protocol_version": {
+          "$ref": "#/$defs/Version"
+        },
+        "selected_index": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "sequence": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "type": {
+          "const": "answer",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "protocol_version",
+        "match_id",
+        "sequence",
+        "challenge_id",
+        "selected_index"
+      ],
+      "type": "object"
+    }
+  ],
+  "title": "ClientCommand"
+}

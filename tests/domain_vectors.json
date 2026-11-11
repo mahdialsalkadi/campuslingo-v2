@@ -1,0 +1,2075 @@
+{
+  "schema_version": "1.0.0",
+  "precision_policy": "user-approved-f32-aware-v1",
+  "absolute_tolerance": 0.000001,
+  "relative_tolerance": 0.000001,
+  "exact_discrete_outcomes": true,
+  "algorithm": "FSRS-6",
+  "requests": [
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 0,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 0,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 0,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 0,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 1,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 1,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 1,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 1,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 5,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 5,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 5,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 5,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 21,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 21,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 21,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 21,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 365,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 365,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 365,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 365,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 36500,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 36500,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 36500,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 36500,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 0.05,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 1,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 5,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 21,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 0,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 1,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 5,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 21,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 365,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 1,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 2,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": {
+          "stability": 365,
+          "difficulty": 5
+        },
+        "elapsed_days": 36500,
+        "rating": 4,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0,
+        "elapsed_days": 0
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0,
+        "elapsed_days": 0.001
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0,
+        "elapsed_days": 0.5
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0,
+        "elapsed_days": 1
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0,
+        "elapsed_days": 21
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0,
+        "elapsed_days": 365
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0.05,
+        "elapsed_days": 0
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0.05,
+        "elapsed_days": 0.001
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0.05,
+        "elapsed_days": 0.5
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0.05,
+        "elapsed_days": 1
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0.05,
+        "elapsed_days": 21
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 0.05,
+        "elapsed_days": 365
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 1,
+        "elapsed_days": 0
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 1,
+        "elapsed_days": 0.001
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 1,
+        "elapsed_days": 0.5
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 1,
+        "elapsed_days": 1
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 1,
+        "elapsed_days": 21
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 1,
+        "elapsed_days": 365
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 5,
+        "elapsed_days": 0
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 5,
+        "elapsed_days": 0.001
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 5,
+        "elapsed_days": 0.5
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 5,
+        "elapsed_days": 1
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 5,
+        "elapsed_days": 21
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 5,
+        "elapsed_days": 365
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 21,
+        "elapsed_days": 0
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 21,
+        "elapsed_days": 0.001
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 21,
+        "elapsed_days": 0.5
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 21,
+        "elapsed_days": 1
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 21,
+        "elapsed_days": 21
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 21,
+        "elapsed_days": 365
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 365,
+        "elapsed_days": 0
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 365,
+        "elapsed_days": 0.001
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 365,
+        "elapsed_days": 0.5
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 365,
+        "elapsed_days": 1
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 365,
+        "elapsed_days": 21
+      }
+    },
+    {
+      "kind": "shield",
+      "input": {
+        "stability": 365,
+        "elapsed_days": 365
+      }
+    },
+    {
+      "kind": "sandbox",
+      "spec": {
+        "schema_version": "1.0.0",
+        "archetype": "TRADEOFF",
+        "modifier": "BUDGET_CAP",
+        "parameters": [
+          {
+            "name": "power",
+            "label": "Power",
+            "minimum": 0,
+            "maximum": 10,
+            "step": 1,
+            "initial": 0
+          }
+        ],
+        "targets": [
+          {
+            "name": "output",
+            "expression": {
+              "kind": "operation",
+              "op": "multiply",
+              "args": [
+                {
+                  "kind": "variable",
+                  "name": "power"
+                },
+                {
+                  "kind": "constant",
+                  "value": 2
+                }
+              ]
+            },
+            "lower": 12,
+            "upper": 14
+          }
+        ],
+        "time_limit_ms": 12000
+      }
+    },
+    {
+      "kind": "sandbox",
+      "spec": {
+        "schema_version": "1.0.0",
+        "archetype": "TRADEOFF",
+        "modifier": "BUDGET_CAP",
+        "parameters": [
+          {
+            "name": "power",
+            "label": "Power",
+            "minimum": 0,
+            "maximum": 10,
+            "step": 1,
+            "initial": 0
+          }
+        ],
+        "targets": [
+          {
+            "name": "output",
+            "expression": {
+              "kind": "operation",
+              "op": "multiply",
+              "args": [
+                {
+                  "kind": "variable",
+                  "name": "power"
+                },
+                {
+                  "kind": "constant",
+                  "value": 2
+                }
+              ]
+            },
+            "lower": 13,
+            "upper": 13
+          }
+        ],
+        "time_limit_ms": 12000
+      }
+    },
+    {
+      "kind": "deploy",
+      "input": {
+        "energy_milli": 5000,
+        "card_cost": 3,
+        "lane": 0,
+        "sequence": 1,
+        "last_sequence": 0,
+        "remaining_ms": 90000
+      }
+    },
+    {
+      "kind": "deploy",
+      "input": {
+        "energy_milli": 2000,
+        "card_cost": 3,
+        "lane": 0,
+        "sequence": 1,
+        "last_sequence": 0,
+        "remaining_ms": 90000
+      }
+    },
+    {
+      "kind": "deploy",
+      "input": {
+        "energy_milli": 5000,
+        "card_cost": 3,
+        "lane": 2,
+        "sequence": 1,
+        "last_sequence": 0,
+        "remaining_ms": 90000
+      }
+    },
+    {
+      "kind": "deploy",
+      "input": {
+        "energy_milli": 5000,
+        "card_cost": 3,
+        "lane": 0,
+        "sequence": 0,
+        "last_sequence": 0,
+        "remaining_ms": 90000
+      }
+    },
+    {
+      "kind": "deploy",
+      "input": {
+        "energy_milli": 5000,
+        "card_cost": 3,
+        "lane": 0,
+        "sequence": 1,
+        "last_sequence": 0,
+        "remaining_ms": 0
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": -1,
+        "rating": 3,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "review",
+      "input": {
+        "memory": null,
+        "elapsed_days": 0,
+        "rating": 5,
+        "desired_retention": 0.9
+      }
+    },
+    {
+      "kind": "exec",
+      "code": "untrusted"
+    }
+  ]
+}

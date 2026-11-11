@@ -1,0 +1,521 @@
+{
+  "$defs": {
+    "AlignmentMethod": {
+      "enum": [
+        "model_durations",
+        "forced_alignment",
+        "asr_estimate"
+      ],
+      "type": "string"
+    },
+    "Archetype": {
+      "enum": [
+        "PIPELINE",
+        "TRADEOFF",
+        "SPATIAL",
+        "CONTRAST",
+        "TRAP",
+        "AXIOM"
+      ],
+      "type": "string"
+    },
+    "AudioManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "alignment_method": {
+          "$ref": "#/$defs/AlignmentMethod"
+        },
+        "asset_id": {
+          "type": "string"
+        },
+        "codec": {
+          "$ref": "#/$defs/Codec"
+        },
+        "duration_ms": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "language": {
+          "$ref": "#/$defs/Language"
+        },
+        "text": {
+          "type": "string"
+        },
+        "words": {
+          "items": {
+            "$ref": "#/$defs/AudioWord"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "asset_id",
+        "language",
+        "codec",
+        "text",
+        "duration_ms",
+        "alignment_method",
+        "words"
+      ],
+      "type": "object"
+    },
+    "AudioWord": {
+      "additionalProperties": false,
+      "properties": {
+        "end_ms": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "start_ms": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "start_ms",
+        "end_ms"
+      ],
+      "type": "object"
+    },
+    "ChoiceChallenge": {
+      "additionalProperties": false,
+      "properties": {
+        "correct_index": {
+          "format": "uint8",
+          "maximum": 255,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 6,
+          "minItems": 2,
+          "type": "array"
+        },
+        "prompt": {
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/ChoiceType"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "prompt",
+        "options",
+        "correct_index",
+        "explanation"
+      ],
+      "type": "object"
+    },
+    "ChoiceType": {
+      "enum": [
+        "MCQ_QUIZ"
+      ],
+      "type": "string"
+    },
+    "Codec": {
+      "enum": [
+        "opus"
+      ],
+      "type": "string"
+    },
+    "DirectorTrack": {
+      "additionalProperties": false,
+      "properties": {
+        "end_ms": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "explode_factor": {
+          "format": "double",
+          "type": "number"
+        },
+        "focus_role": {
+          "$ref": "#/$defs/FocusRole"
+        },
+        "shot_type": {
+          "$ref": "#/$defs/ShotType"
+        },
+        "start_ms": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "start_ms",
+        "end_ms",
+        "focus_role",
+        "shot_type",
+        "explode_factor"
+      ],
+      "type": "object"
+    },
+    "Expression": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "constant",
+              "type": "string"
+            },
+            "value": {
+              "format": "double",
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "variable",
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "args": {
+              "items": {
+                "$ref": "#/$defs/Expression"
+              },
+              "maxItems": 4,
+              "minItems": 2,
+              "type": "array"
+            },
+            "kind": {
+              "const": "operation",
+              "type": "string"
+            },
+            "op": {
+              "$ref": "#/$defs/MathOp"
+            }
+          },
+          "required": [
+            "kind",
+            "op",
+            "args"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "FocusRole": {
+      "enum": [
+        "concept",
+        "input",
+        "output",
+        "fault",
+        "comparison"
+      ],
+      "type": "string"
+    },
+    "Language": {
+      "enum": [
+        "en",
+        "ar"
+      ],
+      "type": "string"
+    },
+    "MathOp": {
+      "enum": [
+        "add",
+        "subtract",
+        "multiply",
+        "divide",
+        "min",
+        "max"
+      ],
+      "type": "string"
+    },
+    "NumericTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "expression": {
+          "$ref": "#/$defs/Expression"
+        },
+        "lower": {
+          "format": "double",
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "upper": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "expression",
+        "lower",
+        "upper"
+      ],
+      "type": "object"
+    },
+    "ParameterSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "initial": {
+          "format": "double",
+          "type": "number"
+        },
+        "label": {
+          "type": "string"
+        },
+        "maximum": {
+          "format": "double",
+          "type": "number"
+        },
+        "minimum": {
+          "format": "double",
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "step": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "minimum",
+        "maximum",
+        "step",
+        "initial"
+      ],
+      "type": "object"
+    },
+    "SandboxSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "archetype": {
+          "$ref": "#/$defs/Archetype"
+        },
+        "modifier": {
+          "type": "string"
+        },
+        "parameters": {
+          "items": {
+            "$ref": "#/$defs/ParameterSpec"
+          },
+          "maxItems": 4,
+          "minItems": 1,
+          "type": "array"
+        },
+        "schema_version": {
+          "$ref": "#/$defs/Version"
+        },
+        "targets": {
+          "items": {
+            "$ref": "#/$defs/NumericTarget"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "type": "array"
+        },
+        "time_limit_ms": {
+          "format": "uint32",
+          "maximum": 30000,
+          "minimum": 1000,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schema_version",
+        "archetype",
+        "modifier",
+        "parameters",
+        "targets",
+        "time_limit_ms"
+      ],
+      "type": "object"
+    },
+    "ShotType": {
+      "enum": [
+        "overview",
+        "close_up",
+        "compare"
+      ],
+      "type": "string"
+    },
+    "SourceRegion": {
+      "additionalProperties": false,
+      "properties": {
+        "bbox": {
+          "items": {
+            "format": "double",
+            "type": "number"
+          },
+          "maxItems": 4,
+          "minItems": 4,
+          "type": "array"
+        },
+        "page": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "page_height": {
+          "format": "double",
+          "type": "number"
+        },
+        "page_width": {
+          "format": "double",
+          "type": "number"
+        },
+        "source_sha256": {
+          "type": "string"
+        },
+        "text_quote": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "source_sha256",
+        "page",
+        "bbox",
+        "page_width",
+        "page_height",
+        "text_quote"
+      ],
+      "type": "object"
+    },
+    "Version": {
+      "enum": [
+        "1.0.0"
+      ],
+      "type": "string"
+    },
+    "WorldTheme": {
+      "enum": [
+        "BIO_SYSTEM",
+        "CYBER_GRID",
+        "MACRO_POLIS",
+        "ARCANE_ARCHIVE"
+      ],
+      "type": "string"
+    }
+  },
+  "$id": "https://campuslingo.invalid/contracts/1.0.0/LearningUnitBundle.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "audio": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AudioManifest"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "challenges": {
+      "items": {
+        "$ref": "#/$defs/ChoiceChallenge"
+      },
+      "type": "array"
+    },
+    "director_tracks": {
+      "items": {
+        "$ref": "#/$defs/DirectorTrack"
+      },
+      "type": "array"
+    },
+    "generator_version": {
+      "type": "string"
+    },
+    "language": {
+      "$ref": "#/$defs/Language"
+    },
+    "node_id": {
+      "type": "string"
+    },
+    "sandbox": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SandboxSpec"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "schema_version": {
+      "$ref": "#/$defs/Version"
+    },
+    "source_regions": {
+      "items": {
+        "$ref": "#/$defs/SourceRegion"
+      },
+      "type": "array"
+    },
+    "tactical_summary": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "type": "array"
+    },
+    "title": {
+      "type": "string"
+    },
+    "world_theme": {
+      "$ref": "#/$defs/WorldTheme"
+    }
+  },
+  "required": [
+    "schema_version",
+    "node_id",
+    "language",
+    "world_theme",
+    "title",
+    "tactical_summary",
+    "source_regions",
+    "challenges",
+    "director_tracks",
+    "generator_version"
+  ],
+  "title": "LearningUnitBundle",
+  "type": "object"
+}

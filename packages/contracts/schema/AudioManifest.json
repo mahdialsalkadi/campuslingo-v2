@@ -1,0 +1,91 @@
+{
+  "$defs": {
+    "AlignmentMethod": {
+      "enum": [
+        "model_durations",
+        "forced_alignment",
+        "asr_estimate"
+      ],
+      "type": "string"
+    },
+    "AudioWord": {
+      "additionalProperties": false,
+      "properties": {
+        "end_ms": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "start_ms": {
+          "format": "uint32",
+          "minimum": 0,
+          "type": "integer"
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text",
+        "start_ms",
+        "end_ms"
+      ],
+      "type": "object"
+    },
+    "Codec": {
+      "enum": [
+        "opus"
+      ],
+      "type": "string"
+    },
+    "Language": {
+      "enum": [
+        "en",
+        "ar"
+      ],
+      "type": "string"
+    }
+  },
+  "$id": "https://campuslingo.invalid/contracts/1.0.0/AudioManifest.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "alignment_method": {
+      "$ref": "#/$defs/AlignmentMethod"
+    },
+    "asset_id": {
+      "type": "string"
+    },
+    "codec": {
+      "$ref": "#/$defs/Codec"
+    },
+    "duration_ms": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "language": {
+      "$ref": "#/$defs/Language"
+    },
+    "text": {
+      "type": "string"
+    },
+    "words": {
+      "items": {
+        "$ref": "#/$defs/AudioWord"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "asset_id",
+    "language",
+    "codec",
+    "text",
+    "duration_ms",
+    "alignment_method",
+    "words"
+  ],
+  "title": "AudioManifest",
+  "type": "object"
+}

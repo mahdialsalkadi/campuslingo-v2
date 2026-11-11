@@ -1,0 +1,56 @@
+{
+  "$defs": {
+    "FocusRole": {
+      "enum": [
+        "concept",
+        "input",
+        "output",
+        "fault",
+        "comparison"
+      ],
+      "type": "string"
+    },
+    "ShotType": {
+      "enum": [
+        "overview",
+        "close_up",
+        "compare"
+      ],
+      "type": "string"
+    }
+  },
+  "$id": "https://campuslingo.invalid/contracts/1.0.0/DirectorTrack.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "end_ms": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    },
+    "explode_factor": {
+      "format": "double",
+      "type": "number"
+    },
+    "focus_role": {
+      "$ref": "#/$defs/FocusRole"
+    },
+    "shot_type": {
+      "$ref": "#/$defs/ShotType"
+    },
+    "start_ms": {
+      "format": "uint32",
+      "minimum": 0,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "start_ms",
+    "end_ms",
+    "focus_role",
+    "shot_type",
+    "explode_factor"
+  ],
+  "title": "DirectorTrack",
+  "type": "object"
+}

@@ -1,0 +1,205 @@
+{
+  "$defs": {
+    "Archetype": {
+      "enum": [
+        "PIPELINE",
+        "TRADEOFF",
+        "SPATIAL",
+        "CONTRAST",
+        "TRAP",
+        "AXIOM"
+      ],
+      "type": "string"
+    },
+    "Expression": {
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "constant",
+              "type": "string"
+            },
+            "value": {
+              "format": "double",
+              "type": "number"
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "variable",
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "kind",
+            "name"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "args": {
+              "items": {
+                "$ref": "#/$defs/Expression"
+              },
+              "maxItems": 4,
+              "minItems": 2,
+              "type": "array"
+            },
+            "kind": {
+              "const": "operation",
+              "type": "string"
+            },
+            "op": {
+              "$ref": "#/$defs/MathOp"
+            }
+          },
+          "required": [
+            "kind",
+            "op",
+            "args"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "MathOp": {
+      "enum": [
+        "add",
+        "subtract",
+        "multiply",
+        "divide",
+        "min",
+        "max"
+      ],
+      "type": "string"
+    },
+    "NumericTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "expression": {
+          "$ref": "#/$defs/Expression"
+        },
+        "lower": {
+          "format": "double",
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "upper": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "expression",
+        "lower",
+        "upper"
+      ],
+      "type": "object"
+    },
+    "ParameterSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "initial": {
+          "format": "double",
+          "type": "number"
+        },
+        "label": {
+          "type": "string"
+        },
+        "maximum": {
+          "format": "double",
+          "type": "number"
+        },
+        "minimum": {
+          "format": "double",
+          "type": "number"
+        },
+        "name": {
+          "type": "string"
+        },
+        "step": {
+          "format": "double",
+          "type": "number"
+        }
+      },
+      "required": [
+        "name",
+        "label",
+        "minimum",
+        "maximum",
+        "step",
+        "initial"
+      ],
+      "type": "object"
+    },
+    "Version": {
+      "enum": [
+        "1.0.0"
+      ],
+      "type": "string"
+    }
+  },
+  "$id": "https://campuslingo.invalid/contracts/1.0.0/SandboxSpec.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "archetype": {
+      "$ref": "#/$defs/Archetype"
+    },
+    "modifier": {
+      "type": "string"
+    },
+    "parameters": {
+      "items": {
+        "$ref": "#/$defs/ParameterSpec"
+      },
+      "maxItems": 4,
+      "minItems": 1,
+      "type": "array"
+    },
+    "schema_version": {
+      "$ref": "#/$defs/Version"
+    },
+    "targets": {
+      "items": {
+        "$ref": "#/$defs/NumericTarget"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "type": "array"
+    },
+    "time_limit_ms": {
+      "format": "uint32",
+      "maximum": 30000,
+      "minimum": 1000,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schema_version",
+    "archetype",
+    "modifier",
+    "parameters",
+    "targets",
+    "time_limit_ms"
+  ],
+  "title": "SandboxSpec",
+  "type": "object"
+}

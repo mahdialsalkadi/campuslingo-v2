@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "archetype": "TRADEOFF",
+  "modifier": "BUDGET_CAP",
+  "parameters": [
+    {"name": "power", "label": "Power", "minimum": 0, "maximum": 10, "step": 1, "initial": 0}
+  ],
+  "targets": [
+    {
+      "name": "output",
+      "expression": {
+        "kind": "operation",
+        "op": "multiply",
+        "args": [{"kind": "variable", "name": "power"}, {"kind": "constant", "value": 2}]
+      },
+      "lower": 12,
+      "upper": 14
+    }
+  ],
+  "time_limit_ms": 12000
+}
