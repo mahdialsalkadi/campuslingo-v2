@@ -6,13 +6,17 @@ use std::{
 };
 
 use campuslingo_ingestion::{
-    ModelLease, RESERVED_HOST_BYTES, host_memory, process_rss, project_root,
+    ModelLease, RESERVED_HOST_BYTES, host_memory,
+    ocr::{ManagedOcrConfig, ManagedOcrServer, OcrClient},
+    pipeline::{ExtractionPipeline, PipelineConfig, RunStatus, default_lease_path},
+    process_rss, project_root,
 };
 use serde_json::{Value, json};
 use tokio::{
     process::Command,
     time::{Instant, sleep},
 };
+use uuid::Uuid;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 
@@ -322,10 +326,87 @@ async fn probe(arguments: &[String]) -> Result<Value, Error> {
     Ok(report)
 }
 
+async fn extract(arguments: &[String]) -> Result<Value, Error> {
+    let pdf =
+        PathBuf::from(option(arguments, "--pdf").ok_or("--pdf is required")?).canonicalize()?;
+    let output = PathBuf::from(option(arguments, "--output").ok_or("--output is required")?);
+    fs::create_dir_all(&output)?;
+    let run_id = option(arguments, "--run-id")
+        .map(|value| Uuid::parse_str(&value))
+        .transpose()?
+        .unwrap_or_else(Uuid::new_v4);
+    let mut config = PipelineConfig::new(output.clone());
+    if let Some(dpi) = option(arguments, "--dpi") {
+        config.render_dpi = dpi.parse()?;
+    }
+
+    let managed = arguments.iter().any(|argument| argument == "--managed-ocr");
+    let mut server = None;
+    if managed {
+        let model = PathBuf::from(option(arguments, "--model").ok_or("--model is required")?)
+            .canonicalize()?;
+        let mmproj = PathBuf::from(option(arguments, "--mmproj").ok_or("--mmproj is required")?)
+            .canonicalize()?;
+        let binary = option(arguments, "--llama-server")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| PathBuf::from("llama-server"));
+        let lease_path = option(arguments, "--lease")
+            .map(PathBuf::from)
+            .unwrap_or_else(|| default_lease_path(&output));
+        let threads = option(arguments, "--threads")
+            .map(|value| value.parse())
+            .transpose()?
+            .unwrap_or(4);
+        let started = ManagedOcrServer::start(&ManagedOcrConfig {
+            binary,
+            model: model.clone(),
+            mmproj,
+            work_dir: output.clone(),
+            lease_path,
+            threads,
+            context_size: 4096,
+        })
+        .await?;
+        let model_name = model
+            .file_name()
+            .map(|name| name.to_string_lossy().into_owned())
+            .unwrap_or_else(|| "local-ocr".into());
+        config.ocr = Some(OcrClient::new(started.client_config(model_name))?);
+        server = Some(started);
+    } else if let (Some(endpoint), Some(model)) = (
+        option(arguments, "--ocr-endpoint"),
+        option(arguments, "--ocr-model"),
+    ) {
+        config.ocr = Some(OcrClient::new(
+            campuslingo_ingestion::ocr::OcrClientConfig::external(endpoint, model),
+        )?);
+    }
+
+    let manifest = ExtractionPipeline::new(config)
+        .run(&pdf, run_id, None)
+        .await?;
+    if let Some(server) = server {
+        server.stop().await;
+    }
+    Ok(json!({
+        "status": manifest.status,
+        "run_id": manifest.run_id,
+        "manifest": campuslingo_ingestion::pipeline::run_directory(&output, manifest.run_id).join("manifest.json"),
+        "source_pages": manifest.source_pages,
+        "render_dpi": manifest.render_dpi,
+        "totals": manifest.totals,
+        "model": manifest.model,
+        "model_peak_rss_bytes": manifest.model_peak_rss_bytes,
+        "failures": manifest.failures,
+        "succeeded": manifest.status == RunStatus::Succeeded,
+    }))
+}
+
 async fn run() -> Result<(), Error> {
     let arguments: Vec<String> = std::env::args().collect();
     let result = match arguments.get(1).map(String::as_str) {
         Some("probe") => probe(&arguments).await?,
+        Some("extract") => extract(&arguments).await?,
         Some("environment") => json!({"host":host_memory()?,"reserved_host_bytes":RESERVED_HOST_BYTES}),
         Some("onnx-probe") => {
             #[cfg(feature="onnx")]
@@ -333,7 +414,7 @@ async fn run() -> Result<(), Error> {
             #[cfg(not(feature="onnx"))]
             {json!({"status":"blocked","reason":"build with --features onnx and supply a compatible local ONNX Runtime library; no automatic binary download"})}
         },
-        _ => return Err("usage: campuslingo-ingestion environment | probe --model PATH --role generator|router [--port N] | onnx-probe --library PATH".into()),
+        _ => return Err("usage: campuslingo-ingestion environment | probe --model PATH --role generator|router [--port N] | extract --pdf PATH --output DIR [--run-id UUID] [--dpi N] [--managed-ocr --model PATH --mmproj PATH [--llama-server PATH] [--threads N] [--lease PATH]] | onnx-probe --library PATH".into()),
     };
     println!("{}", serde_json::to_string_pretty(&result)?);
     Ok(())

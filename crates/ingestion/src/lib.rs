@@ -1,5 +1,11 @@
 //! Production model lifecycle primitives. Python is not part of this worker.
 
+pub mod crops;
+pub mod fingerprint;
+pub mod ocr;
+pub mod pdf;
+pub mod pipeline;
+
 use fs2::FileExt;
 use serde::Serialize;
 use std::{
@@ -42,10 +48,20 @@ pub fn host_memory() -> io::Result<HostMemory> {
 }
 
 pub fn process_rss(pid: u32) -> io::Result<u64> {
+    process_status_kb(pid, "VmRSS:")
+}
+
+/// Peak resident memory since the process started. Used for the M2 model
+/// memory-budget evidence, where the transient peak is what matters.
+pub fn process_peak_rss(pid: u32) -> io::Result<u64> {
+    process_status_kb(pid, "VmHWM:")
+}
+
+fn process_status_kb(pid: u32, field: &str) -> io::Result<u64> {
     let text = fs::read_to_string(format!("/proc/{pid}/status"))?;
     let kb: u64 = text
         .lines()
-        .find(|line| line.starts_with("VmRSS:"))
+        .find(|line| line.starts_with(field))
         .and_then(|line| line.split_whitespace().nth(1))
         .ok_or_else(|| io::Error::other("missing RSS"))?
         .parse()

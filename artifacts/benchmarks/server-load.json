@@ -1,0 +1,29 @@
+{
+  "observed_at": "2026-11-11T15:02:09.020Z",
+  "stage": "M0 foundation only",
+  "workload": "30 persistent WebSockets evaluating the shared Rust FSRS-6 domain, up to 4 requests/sec/client",
+  "not_yet_implemented": "auth, PostgreSQL transactions, real 90-second combat, matchmaking, and 15 complete duels remain M1/M5/M7 gates",
+  "duration_seconds": 10,
+  "clients": 30,
+  "successful_requests": 1200,
+  "errors": [],
+  "idle_rss_bytes": 4321280,
+  "peak_rss_bytes": 8986624,
+  "process_rss_target_bytes": 52428800,
+  "memory_target_passed": true,
+  "minimum_host_available_bytes": 8661352448,
+  "latency_ms": {
+    "p50": 0.7036179999995511,
+    "p95": 2.0241780000000063,
+    "p99": 4.531644,
+    "max": 4.845619999999997
+  },
+  "health": {
+    "algorithm": "FSRS-6",
+    "schema_version": "1.0.0",
+    "stage": "M0",
+    "status": "alive"
+  },
+  "readiness_http": 503,
+  "status": "passed_foundation_probe"
+}

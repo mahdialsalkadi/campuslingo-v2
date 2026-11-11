@@ -1,0 +1,118 @@
+{
+  "fixture_version": "1.0.0",
+  "provenance": "Synthetic English fixture authored for M2 acceptance. Text pages are digital; page 3 is a raster image rendered with ImageMagick. This does not annotate the user-supplied lecture corpus.",
+  "pdf": "annotated-english.pdf",
+  "page_size_pt": [
+    612,
+    792
+  ],
+  "pages": [
+    {
+      "number": 1,
+      "route": "digital",
+      "lines": [
+        "Photosynthesis converts light energy into chemical energy.",
+        "The reaction yield is 42%, not 24%.",
+        "Energy is measured in joules (J).",
+        "Formula: E = mc^2",
+        "The sample has 3 cells.",
+        "The sample has 8 cells."
+      ]
+    },
+    {
+      "number": 2,
+      "route": "digital",
+      "lines": [
+        "Photosynthesis converts light energy into chemical energy.",
+        "The cell membrane controls what enters and leaves the cell.",
+        "The cell membrane controls what enters and leaves a cell.",
+        "The force is zero.",
+        "The force is not zero.",
+        "The mass is 5 kg.",
+        "The mass is 5 g.",
+        "The expression is x^2.",
+        "The expression is x^3.",
+        "The measured value is 1,000 units.",
+        "The measured value is 1000 units.",
+        "The reaction yield is 24%, not 42%."
+      ]
+    },
+    {
+      "number": 3,
+      "route": "ocr",
+      "lines": [
+        "The reaction yield is 42%, not 24%.",
+        "Energy is measured in joules (J).",
+        "Formula: E = mc^2"
+      ],
+      "image": {
+        "height": 420,
+        "width": 1200
+      }
+    },
+    {
+      "number": 4,
+      "route": "blank",
+      "lines": []
+    }
+  ],
+  "dedup": {
+    "must_merge": [
+      {
+        "kind": "exact",
+        "text": "Photosynthesis converts light energy into chemical energy.",
+        "pages": [
+          1,
+          2
+        ]
+      },
+      {
+        "kind": "near",
+        "left": "The cell membrane controls what enters and leaves the cell.",
+        "right": "The cell membrane controls what enters and leaves a cell."
+      },
+      {
+        "kind": "exact_across_routes",
+        "text": "The reaction yield is 42%, not 24%.",
+        "pages": [
+          1,
+          3
+        ]
+      }
+    ],
+    "must_not_merge": [
+      {
+        "reason": "number",
+        "left": "The sample has 3 cells.",
+        "right": "The sample has 8 cells."
+      },
+      {
+        "reason": "number_order",
+        "left": "The reaction yield is 42%, not 24%.",
+        "right": "The reaction yield is 24%, not 42%."
+      },
+      {
+        "reason": "formula",
+        "left": "The expression is x^2.",
+        "right": "The expression is x^3."
+      },
+      {
+        "reason": "unit",
+        "left": "The mass is 5 kg.",
+        "right": "The mass is 5 g."
+      },
+      {
+        "reason": "negation",
+        "left": "The force is zero.",
+        "right": "The force is not zero."
+      }
+    ]
+  },
+  "expectations": {
+    "minimum_digital_crops": 4,
+    "minimum_ocr_crops": 2,
+    "minimum_ocr_token_recall": 0.8,
+    "crop_media_type": "image/webp",
+    "max_single_model_rss_bytes": 1073741824
+  }
+}

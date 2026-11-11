@@ -1,0 +1,135 @@
+{
+  "observed_at": "2026-11-11T16:15:03.755Z",
+  "milestone": "M0",
+  "architecture": "Rust/WASM; Python offline evaluation only",
+  "status": "not_complete",
+  "checks": [
+    {
+      "name": "build-native-wasm-contracts",
+      "command": [
+        "npm",
+        "run",
+        "m0:build"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "log": "/home/mahdi/campuslingo-v2//artifacts/private/checks/build-native-wasm-contracts.log"
+    },
+    {
+      "name": "rust-unit-tests",
+      "command": [
+        "cargo",
+        "test",
+        "--workspace",
+        "--locked"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "log": "/home/mahdi/campuslingo-v2//artifacts/private/checks/rust-unit-tests.log"
+    },
+    {
+      "name": "rust-clippy",
+      "command": [
+        "cargo",
+        "clippy",
+        "--workspace",
+        "--all-targets",
+        "--all-features",
+        "--locked",
+        "--",
+        "-D",
+        "warnings"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "log": "/home/mahdi/campuslingo-v2//artifacts/private/checks/rust-clippy.log"
+    },
+    {
+      "name": "contract-drift",
+      "command": [
+        "npm",
+        "run",
+        "contracts:check"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "log": "/home/mahdi/campuslingo-v2//artifacts/private/checks/contract-drift.log"
+    },
+    {
+      "name": "typescript-typecheck",
+      "command": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "log": "/home/mahdi/campuslingo-v2//artifacts/private/checks/typescript-typecheck.log"
+    },
+    {
+      "name": "typescript-contract-tests",
+      "command": [
+        "npm",
+        "run",
+        "test:ts"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "log": "/home/mahdi/campuslingo-v2//artifacts/private/checks/typescript-contract-tests.log"
+    },
+    {
+      "name": "approved-native-wasm-parity",
+      "command": [
+        "npm",
+        "run",
+        "test:wasm"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "log": "/home/mahdi/campuslingo-v2//artifacts/private/checks/approved-native-wasm-parity.log"
+    },
+    {
+      "name": "offline-reference-tests",
+      "command": [
+        "uv",
+        "run",
+        "pytest"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "log": "/home/mahdi/campuslingo-v2//artifacts/private/checks/offline-reference-tests.log"
+    },
+    {
+      "name": "offline-python-lint",
+      "command": [
+        "uv",
+        "run",
+        "ruff",
+        "check",
+        "scripts",
+        "tests",
+        "tools/eval/python"
+      ],
+      "exit_code": 0,
+      "status": "passed",
+      "log": "/home/mahdi/campuslingo-v2//artifacts/private/checks/offline-python-lint.log"
+    }
+  ],
+  "reused_existing_resource_probes": true,
+  "synthetic_generation": {
+    "status": "passed_synthetic_only",
+    "trials": 2,
+    "first_pass_valid": 2,
+    "repaired_valid": 0,
+    "warning": "Tiny seeded capability probe, not educational correctness or a held-out quality rate."
+  },
+  "outstanding_gates": [
+    "OCR, embedding, actual TTS/alignment and GLB-model runtime validation are not established by repository metadata.",
+    "Full license/provenance review and a representative routing evaluation are not replaced by metadata and three synthetic labels."
+  ],
+  "documented_later_dependencies": [
+    "Local M8 training runtime/fit is unproven; the environment report records this rather than silently adopting cloud training.",
+    "30 validation sockets are not the M5/M7 gate of 15 complete 90-second duels with database/cache contention.",
+    "Physical Android and iOS Safari/PWA acceptance belongs to later delivery gates."
+  ]
+}

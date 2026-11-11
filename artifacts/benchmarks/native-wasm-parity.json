@@ -1,0 +1,218 @@
+{
+  "observed_at": "2026-11-11T16:15:03.154Z",
+  "algorithm": "FSRS-6",
+  "rust_crate": "fsrs/7.0.0 explicitly using FSRS6_DEFAULT_PARAMETERS",
+  "precision": "upstream f32 memory; f64 sandbox arithmetic",
+  "precision_policy": "user-approved-f32-aware-v1",
+  "exact_discrete_outcomes": true,
+  "vectors": 190,
+  "absolute_tolerance": 0.000001,
+  "relative_tolerance": 0.000001,
+  "difference_count": 0,
+  "differences": [],
+  "strict_absolute_diagnostic": {
+    "status": "exceeds_absolute_only_tolerance",
+    "difference_count": 33,
+    "differences": [
+      {
+        "path": "vector[69].result.stability",
+        "native": 21.9448,
+        "wasm": 21.944805,
+        "absolute_error": 0.0000049999999980343546
+      },
+      {
+        "path": "vector[69].result.interval_days",
+        "native": 21.9448,
+        "wasm": 21.944805,
+        "absolute_error": 0.0000049999999980343546
+      },
+      {
+        "path": "vector[70].result.stability",
+        "native": 35.826736,
+        "wasm": 35.826744,
+        "absolute_error": 0.000008000000001118224
+      },
+      {
+        "path": "vector[70].result.interval_days",
+        "native": 35.826736,
+        "wasm": 35.826744,
+        "absolute_error": 0.000008000000001118224
+      },
+      {
+        "path": "vector[71].result.stability",
+        "native": 66.227,
+        "wasm": 66.22701,
+        "absolute_error": 0.000010000000003174137
+      },
+      {
+        "path": "vector[71].result.interval_days",
+        "native": 66.227,
+        "wasm": 66.22701,
+        "absolute_error": 0.000010000000003174137
+      },
+      {
+        "path": "vector[79].result.stability",
+        "native": 11.122906,
+        "wasm": 11.122905,
+        "absolute_error": 0.0000010000000010279564
+      },
+      {
+        "path": "vector[79].result.interval_days",
+        "native": 11.122906,
+        "wasm": 11.122905,
+        "absolute_error": 0.0000010000000010279564
+      },
+      {
+        "path": "vector[82].result.stability",
+        "native": 17.361525,
+        "wasm": 17.361523,
+        "absolute_error": 0.0000020000000020559128
+      },
+      {
+        "path": "vector[82].result.interval_days",
+        "native": 17.361525,
+        "wasm": 17.361523,
+        "absolute_error": 0.0000020000000020559128
+      },
+      {
+        "path": "vector[83].result.stability",
+        "native": 28.151897,
+        "wasm": 28.151896,
+        "absolute_error": 0.0000010000000010279564
+      },
+      {
+        "path": "vector[83].result.interval_days",
+        "native": 28.151897,
+        "wasm": 28.151896,
+        "absolute_error": 0.0000010000000010279564
+      },
+      {
+        "path": "vector[85].result.stability",
+        "native": 22.391266,
+        "wasm": 22.391262,
+        "absolute_error": 0.000004000000000559112
+      },
+      {
+        "path": "vector[85].result.interval_days",
+        "native": 22.391266,
+        "wasm": 22.391262,
+        "absolute_error": 0.000004000000000559112
+      },
+      {
+        "path": "vector[87].result.stability",
+        "native": 59.160458,
+        "wasm": 59.160454,
+        "absolute_error": 0.000003999999997006398
+      },
+      {
+        "path": "vector[87].result.interval_days",
+        "native": 59.160458,
+        "wasm": 59.160454,
+        "absolute_error": 0.000003999999997006398
+      },
+      {
+        "path": "vector[90].result.stability",
+        "native": 75.0344,
+        "wasm": 75.03439,
+        "absolute_error": 0.000010000000003174137
+      },
+      {
+        "path": "vector[90].result.interval_days",
+        "native": 75.0344,
+        "wasm": 75.03439,
+        "absolute_error": 0.000010000000003174137
+      },
+      {
+        "path": "vector[91].result.stability",
+        "native": 136.16743,
+        "wasm": 136.16742,
+        "absolute_error": 0.000010000000003174137
+      },
+      {
+        "path": "vector[91].result.interval_days",
+        "native": 136.16743,
+        "wasm": 136.16742,
+        "absolute_error": 0.000010000000003174137
+      },
+      {
+        "path": "vector[93].result.stability",
+        "native": 77.70055,
+        "wasm": 77.70054,
+        "absolute_error": 0.000010000000003174137
+      },
+      {
+        "path": "vector[93].result.interval_days",
+        "native": 77.70055,
+        "wasm": 77.70054,
+        "absolute_error": 0.000010000000003174137
+      },
+      {
+        "path": "vector[94].result.stability",
+        "native": 125.885506,
+        "wasm": 125.8855,
+        "absolute_error": 0.000006000000013273166
+      },
+      {
+        "path": "vector[95].result.stability",
+        "native": 231.40646,
+        "wasm": 231.40643,
+        "absolute_error": 0.00003000000000952241
+      },
+      {
+        "path": "vector[95].result.interval_days",
+        "native": 231.40646,
+        "wasm": 231.40643,
+        "absolute_error": 0.00003000000000952241
+      },
+      {
+        "path": "vector[113].result.stability",
+        "native": 119.40976,
+        "wasm": 119.40973,
+        "absolute_error": 0.00003000000000952241
+      },
+      {
+        "path": "vector[113].result.interval_days",
+        "native": 119.40976,
+        "wasm": 119.40973,
+        "absolute_error": 0.00003000000000952241
+      },
+      {
+        "path": "vector[114].result.stability",
+        "native": 184.63446,
+        "wasm": 184.6344,
+        "absolute_error": 0.00005999999999062311
+      },
+      {
+        "path": "vector[114].result.interval_days",
+        "native": 184.63446,
+        "wasm": 184.6344,
+        "absolute_error": 0.00005999999999062311
+      },
+      {
+        "path": "vector[115].result.stability",
+        "native": 327.47098,
+        "wasm": 327.4709,
+        "absolute_error": 0.00008000000002539309
+      },
+      {
+        "path": "vector[115].result.interval_days",
+        "native": 327.47098,
+        "wasm": 327.4709,
+        "absolute_error": 0.00008000000002539309
+      },
+      {
+        "path": "vector[116].result.stability",
+        "native": 5.190593,
+        "wasm": 5.190592,
+        "absolute_error": 0.000001000000000139778
+      },
+      {
+        "path": "vector[116].result.interval_days",
+        "native": 5.190593,
+        "wasm": 5.190592,
+        "absolute_error": 0.000001000000000139778
+      }
+    ]
+  },
+  "status": "passed"
+}

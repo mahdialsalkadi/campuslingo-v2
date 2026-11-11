@@ -1,0 +1,64 @@
+{
+  "observed_at": "2026-11-11T16:16:00.878Z",
+  "stage": "M1 authenticated HTTP and persistence; no combat loop",
+  "workload": "30 authenticated learners creating attempts, answering reviews, reading content/practice, and downloading a private 128 KiB asset; one instructor enqueues/reads durable jobs",
+  "duration_seconds": 15,
+  "think_time_ms": 350,
+  "seed": {
+    "users": 31,
+    "sessions": 31,
+    "course_members": 31,
+    "challenges": 6,
+    "asset_bytes": 131072
+  },
+  "requests": 3430,
+  "requests_per_second": 228.67,
+  "by_operation": {
+    "answer_attempt": 1208,
+    "create_attempt": 1208,
+    "download_asset": 240,
+    "enqueue_job": 42,
+    "get_job": 42,
+    "practice_question": 300,
+    "read_content": 390
+  },
+  "http_statuses": {
+    "200": 2180,
+    "201": 1250
+  },
+  "error_count": 0,
+  "errors": [],
+  "downloaded_bytes": 32305886,
+  "latency_ms": {
+    "p50": 8.00791400000162,
+    "p95": 17.3122349999976,
+    "p99": 46.039097000000766,
+    "max": 82.5559790000043
+  },
+  "rust_server": {
+    "idle_rss_bytes": 5619712,
+    "peak_rss_bytes": 24719360,
+    "target_bytes": 52428800,
+    "target_passed": true,
+    "note": "Measured separately from PostgreSQL and any AI/model process."
+  },
+  "postgresql": {
+    "idle_tree_rss_bytes": 91410432,
+    "peak_tree_rss_bytes": 430616576,
+    "note": "Sum of postmaster and backend RSS; shared_buffers are mapped by each process and are therefore counted more than once. This is a conservative separate figure, not unique physical memory."
+  },
+  "health": {
+    "algorithm": "FSRS-6",
+    "schema_version": "1.0.0",
+    "stage": "M1",
+    "status": "alive"
+  },
+  "readiness_http": 200,
+  "server_request_log_lines": 3434,
+  "status": "passed_m1_http_probe",
+  "not_a_claim": [
+    "This is not a 15-duel or 90-second combat benchmark; M1 has no combat, matchmaking, Redis, or AI worker contention.",
+    "Sessions were seeded directly in PostgreSQL to avoid the authentication rate-limit path; auth itself is covered by the M1 acceptance suite.",
+    "Latency includes local PostgreSQL, request logging, and localhost HTTP; it is not a WAN or device measurement."
+  ]
+}
