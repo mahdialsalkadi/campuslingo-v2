@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "window_table_version": 1,
+  "authority": "CL2-MASTER-UNIFIED-v1.8.1 §8.1 (restored ADR-003 §2.6 values)",
+  "formula": {
+    "w_eff_ms": "w_base_ms * M_num / M_den",
+    "tail_ms": "min(2000, w_eff_ms / 5)",
+    "w_cut_ms": "w_eff_ms + tail_ms"
+  },
+  "multipliers": [
+    { "label": "m1_0",  "num": 1, "den": 1 },
+    { "label": "m1_25", "num": 5, "den": 4 },
+    { "label": "m1_5",  "num": 3, "den": 2 }
+  ],
+  "expected_counts": {
+    "base_pairs": 18,
+    "chain_sub_modes": 1,
+    "live_duel_eligible_base_pairs": 13,
+    "deep_analysis_pairs_with_live_drill_override": 5
+  },
+  "entries": [
+    { "kind": "BASE_PAIR", "archetype": "PIPELINE", "modifier": "REVERSE_ENG",          "w_base_ms": 10000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 12000, "m1_25": 14500, "m1_5": 17000 } },
+    { "kind": "BASE_PAIR", "archetype": "PIPELINE", "modifier": "BOTTLENECK_RELIEF",    "w_base_ms": 10000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 12000, "m1_25": 14500, "m1_5": 17000 } },
+    { "kind": "BASE_PAIR", "archetype": "PIPELINE", "modifier": "FAULT_INJECTION",      "w_base_ms":  9000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 10800, "m1_25": 13250, "m1_5": 15500 } },
+    { "kind": "BASE_PAIR", "archetype": "TRADEOFF", "modifier": "OVERLOAD_STRESS",      "w_base_ms": 10000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 12000, "m1_25": 14500, "m1_5": 17000 } },
+    { "kind": "BASE_PAIR", "archetype": "TRADEOFF", "modifier": "BUDGET_CAP",           "w_base_ms": 11000, "live_duel_eligible": false, "live_duel_variant_base_ms": 10000, "w_cut_ms": { "m1_0": 13000, "m1_25": 15750, "m1_5": 18500 } },
+    { "kind": "BASE_PAIR", "archetype": "TRADEOFF", "modifier": "PARETO_BALANCE",       "w_base_ms": 12000, "live_duel_eligible": false, "live_duel_variant_base_ms": 10000, "w_cut_ms": { "m1_0": 14000, "m1_25": 17000, "m1_5": 20000 } },
+    { "kind": "BASE_PAIR", "archetype": "SPATIAL",  "modifier": "BLIND_DIAGNOSIS",      "w_base_ms": 10000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 12000, "m1_25": 14500, "m1_5": 17000 } },
+    { "kind": "BASE_PAIR", "archetype": "SPATIAL",  "modifier": "SURGICAL_REPAIR",      "w_base_ms": 10000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 12000, "m1_25": 14500, "m1_5": 17000 } },
+    { "kind": "BASE_PAIR", "archetype": "SPATIAL",  "modifier": "CROSS_SECTION_SCAN",   "w_base_ms":  9000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 10800, "m1_25": 13250, "m1_5": 15500 } },
+    { "kind": "BASE_PAIR", "archetype": "CONTRAST", "modifier": "STRESS_BENCHMARK",     "w_base_ms": 10000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 12000, "m1_25": 14500, "m1_5": 17000 } },
+    { "kind": "BASE_PAIR", "archetype": "CONTRAST", "modifier": "BLIND_CHAMBER_ID",     "w_base_ms":  9000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 10800, "m1_25": 13250, "m1_5": 15500 } },
+    { "kind": "BASE_PAIR", "archetype": "CONTRAST", "modifier": "CROSS_CALIBRATION",    "w_base_ms": 11000, "live_duel_eligible": false, "live_duel_variant_base_ms": 10000, "w_cut_ms": { "m1_0": 13000, "m1_25": 15750, "m1_5": 18500 } },
+    { "kind": "BASE_PAIR", "archetype": "TRAP",     "modifier": "FORENSIC_AUDIT",       "w_base_ms": 12000, "live_duel_eligible": false, "live_duel_variant_base_ms": 10000, "w_cut_ms": { "m1_0": 14000, "m1_25": 17000, "m1_5": 20000 } },
+    { "kind": "BASE_PAIR", "archetype": "TRAP",     "modifier": "COUNTEREXAMPLE_PROBE", "w_base_ms": 11000, "live_duel_eligible": false, "live_duel_variant_base_ms": 10000, "w_cut_ms": { "m1_0": 13000, "m1_25": 15750, "m1_5": 18500 } },
+    { "kind": "BASE_PAIR", "archetype": "TRAP",     "modifier": "SAFEGUARD_PATCH",      "w_base_ms": 10000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0": 12000, "m1_25": 14500, "m1_5": 17000 } },
+    { "kind": "BASE_PAIR", "archetype": "AXIOM",    "modifier": "SPEED_BLITZ",          "w_base_ms":  6000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0":  7200, "m1_25":  9000, "m1_5": 10800 } },
+    { "kind": "BASE_PAIR", "archetype": "AXIOM",    "modifier": "COROLLARY_CHAIN",      "w_base_ms":  8000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0":  9600, "m1_25": 12000, "m1_5": 14000 } },
+    { "kind": "BASE_PAIR", "archetype": "AXIOM",    "modifier": "BOUNDARY_TEST",        "w_base_ms":  8000, "live_duel_eligible": true,  "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0":  9600, "m1_25": 12000, "m1_5": 14000 } },
+    { "kind": "CHAIN_SUB_MODE", "archetype": "AXIOM", "modifier": "QUICK_BLITZ_CHAIN",  "w_base_ms":  4000, "live_duel_eligible": false, "live_duel_variant_base_ms": null,  "w_cut_ms": { "m1_0":  4800, "m1_25":  6000, "m1_5":  7200 } }
+  ]
+}

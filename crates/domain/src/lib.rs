@@ -6,6 +6,7 @@ pub mod combat;
 pub mod contracts;
 pub mod memory;
 pub mod sandbox;
+pub mod windows;
 
 use serde::{Deserialize, Serialize};
 

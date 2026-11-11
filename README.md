@@ -49,8 +49,23 @@ the runtime. The official Rust crate release `fsrs = 7.0.0` is explicitly given
 - Full M0–M8 roadmap, free licensed assets, shared-HP co-op in both modes, weekly
   clan wars, and all eight approved fairness rules remain in scope.
 
-The full approved plan, including the Rust amendment, is saved at:
-`/home/mahdi/.opencode/plan/campuslingo-v2-master-plan.md`.
+## Planning authority
+
+The sole maintained planning source is **`/home/mahdi/Downloads/plan`**.
+Its complete package is published byte-for-byte under [`planning/`](planning/):
+
+- [Frozen master specification v1.8.1](planning/campuslingo_v2_master_plan.md)
+- [Editorial patch](planning/cl2_patch_001.md)
+- [Implementation decisions](planning/implementation_decisions.md)
+- [Balance register](planning/docs/balance-v1.md)
+- [Window fixture](planning/w_base_v1.json), [test harness](planning/w_base_v1.rs),
+  and [G-6b window evidence](planning/docs/g6b-window-evidence.md)
+
+Edit the maintained source directory, then synchronize this publication snapshot;
+do not maintain a competing plan here. The older v1.3 plan and corrective register
+are superseded. Specification approval does not mean its runtime features or
+acceptance gates are implemented; historical status reports remain evidence,
+not planning authority.
 
 ## Toolchains and reproducibility
 
@@ -169,9 +184,11 @@ AI workers, and deployment hardening remain later gates.
 
 - `artifacts/private/`: local paths, PDF hashes/statistics, environment/model
   inventory, synthetic model outputs/logs. Ignored by Git.
-- `artifacts/benchmarks/`: generated parity/resource reports. Ignored by Git.
+- `artifacts/benchmarks/`: selected baseline parity/resource reports are committed;
+  private raw evidence remains excluded.
 - `tests/domain_vectors.json`: committed synthetic inputs, no lecture content.
 - `tests/fsrs_golden_vectors.json`: offline Python-reference data only, not the
   canonical production implementation or runtime scheduling policy.
 
-Do not commit PDFs, model weights, credentials, or private course material.
+Do not commit lecture PDFs, model weights, credentials, or private course
+material. The explicitly synthetic M2 PDF fixture is the allow-listed exception.
