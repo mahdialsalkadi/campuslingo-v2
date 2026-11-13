@@ -8,8 +8,14 @@ pub mod assets;
 pub mod auth;
 pub mod courses;
 pub mod crypto;
+pub mod duels;
+pub mod generation;
+pub mod ingestion;
 pub mod jobs;
+pub mod m6;
+pub mod m7;
 pub mod review;
+pub mod shields;
 
 use sqlx::{PgConnection, PgPool, Postgres, Transaction};
 use thiserror::Error;

@@ -189,8 +189,12 @@ class AudioManifest(Contract):
     codec: Literal["opus"]
     text: Annotated[str, Field(min_length=1, max_length=2000)]
     duration_ms: Annotated[int, Field(ge=1, le=30_000)]
-    alignment_method: Literal["model_durations", "forced_alignment", "asr_estimate"]
+    alignment_method: Literal["model_durations", "forced_alignment", "asr_estimate", "CLAUSE_CONCAT"]
     words: Annotated[list[AudioWord], Field(min_length=1, max_length=200)]
+    degraded: bool | None = None
+    quality_gate_passed: bool | None = None
+    normalized_wer: FiniteNumber | None = None
+    quality_note: Annotated[str, Field(max_length=500)] | None = None
 
     @model_validator(mode="after")
     def timestamps_within_audio(self) -> AudioManifest:

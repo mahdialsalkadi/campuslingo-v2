@@ -21,6 +21,7 @@ fn explicitly_uses_fsrs6_not_the_crates_fsrs7_default() {
             elapsed_days: 0,
             rating,
             desired_retention: 0.9,
+            parameters: None,
         })
         .unwrap();
         assert_eq!(result.algorithm, "FSRS-6");
@@ -91,7 +92,8 @@ fn invalid_grades_nan_and_negative_time_are_rejected() {
                 memory: None,
                 elapsed_days: 1,
                 rating,
-                desired_retention: 0.9
+                desired_retention: 0.9,
+                parameters: None,
             })
             .is_err()
         );
@@ -101,6 +103,7 @@ fn invalid_grades_nan_and_negative_time_are_rejected() {
             campuslingo_domain::memory::shield(&campuslingo_domain::memory::ShieldInput {
                 stability: 5.0,
                 elapsed_days,
+                decay: None,
             })
             .is_err()
         );

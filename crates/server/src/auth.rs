@@ -133,9 +133,13 @@ pub async fn optional_actor(
 }
 
 pub async fn require_actor(state: &AppState, headers: &HeaderMap) -> Result<Uuid, ApiError> {
-    optional_actor(state, headers)
+    let actor = optional_actor(state, headers)
         .await?
-        .ok_or(ApiError::Unauthorized)
+        .ok_or(ApiError::Unauthorized)?;
+    if !state.actor_limiter.allow(actor).await {
+        return Err(ApiError::TooManyRequests);
+    }
+    Ok(actor)
 }
 
 pub struct AuthLimiter {
@@ -181,6 +185,46 @@ impl AuthLimiter {
 impl Default for AuthLimiter {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+/// A-06 per-actor HTTP rate limiter using a sliding 60-second bucket.
+pub struct ActorRateLimiter {
+    buckets: Mutex<HashMap<Uuid, Bucket>>,
+    limit: u32,
+}
+
+impl ActorRateLimiter {
+    pub fn from_env() -> Self {
+        let limit = std::env::var("CAMPUSLINGO_ACTOR_RATE_LIMIT")
+            .ok()
+            .and_then(|raw| raw.parse::<u32>().ok())
+            .unwrap_or(180);
+        Self::with_limit(limit)
+    }
+
+    pub fn with_limit(limit: u32) -> Self {
+        Self {
+            buckets: Mutex::new(HashMap::new()),
+            limit: limit.max(1),
+        }
+    }
+
+    pub async fn allow(&self, actor: Uuid) -> bool {
+        let mut buckets = self.buckets.lock().await;
+        if buckets.len() > 8192 {
+            buckets.retain(|_, bucket| bucket.window.elapsed() < Duration::from_secs(120));
+        }
+        let bucket = buckets.entry(actor).or_insert(Bucket {
+            window: Instant::now(),
+            count: 0,
+        });
+        if bucket.window.elapsed() >= Duration::from_secs(60) {
+            bucket.window = Instant::now();
+            bucket.count = 0;
+        }
+        bucket.count += 1;
+        bucket.count <= self.limit
     }
 }
 

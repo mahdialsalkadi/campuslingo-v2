@@ -1,17 +1,25 @@
 use std::{
     fs::{self, File},
-    path::PathBuf,
+    io::Read,
+    path::{Path, PathBuf},
     sync::atomic::{AtomicU64, Ordering},
     time::Duration,
 };
 
 use campuslingo_ingestion::{
-    ModelLease, RESERVED_HOST_BYTES, host_memory,
-    ocr::{ManagedOcrConfig, ManagedOcrServer, OcrClient},
+    ModelLease, RESERVED_HOST_BYTES,
+    embeddings::{
+        DEFAULT_EMBEDDING_MODEL_ID, DEFAULT_EMBEDDING_REVISION, EMBEDDING_CONTEXT_SIZE,
+        EMBEDDING_PREPROCESS_VERSION, ManagedEmbeddingConfig,
+    },
+    host_memory,
+    ocr::{ManagedOcrConfig, ManagedOcrRuntime, OcrClient},
     pipeline::{ExtractionPipeline, PipelineConfig, RunStatus, default_lease_path},
     process_rss, project_root,
+    worker::{ManagedOcrWorkerSpec, WorkerConfig},
 };
 use serde_json::{Value, json};
+use sha2::{Digest, Sha256};
 use tokio::{
     process::Command,
     time::{Instant, sleep},
@@ -19,6 +27,147 @@ use tokio::{
 use uuid::Uuid;
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
+
+fn file_sha256(path: &Path) -> Result<String, Error> {
+    let mut file = File::open(path)?;
+    let mut sha = Sha256::new();
+    let mut buffer = [0_u8; 64 * 1024];
+    loop {
+        let read = file.read(&mut buffer)?;
+        if read == 0 {
+            break;
+        }
+        sha.update(&buffer[..read]);
+    }
+    Ok(hex::encode(sha.finalize()))
+}
+
+struct ManagedOcrSpec {
+    spec: ManagedOcrWorkerSpec,
+    identity: Value,
+}
+
+async fn resolve_device(binary: &Path, requested: Option<String>) -> Option<String> {
+    match requested.as_deref() {
+        Some("none" | "cpu" | "CPU") => None,
+        Some("auto") | None => campuslingo_ingestion::llama::detect_vulkan_device(binary).await,
+        Some(device) => Some(device.to_owned()),
+    }
+}
+
+async fn build_managed_ocr_spec(
+    arguments: &[String],
+    work_dir: &Path,
+) -> Result<ManagedOcrSpec, Error> {
+    let model =
+        PathBuf::from(option(arguments, "--model").ok_or("--model is required")?).canonicalize()?;
+    let mmproj = PathBuf::from(option(arguments, "--mmproj").ok_or("--mmproj is required")?)
+        .canonicalize()?;
+    let binary = option(arguments, "--llama-server")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("llama-server"));
+    let lease_path = option(arguments, "--lease")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| default_lease_path(work_dir));
+    let threads = option(arguments, "--threads")
+        .map(|value| value.parse())
+        .transpose()?
+        .unwrap_or(16);
+    let gpu_device = resolve_device(&binary, option(arguments, "--ocr-device")).await;
+    let model_name = model
+        .file_name()
+        .map(|name| name.to_string_lossy().into_owned())
+        .unwrap_or_else(|| "local-ocr".into());
+    let identity = json!({
+        "model": &model_name,
+        "model_sha256": file_sha256(&model)?,
+        "mmproj_sha256": file_sha256(&mmproj)?,
+        "threads": threads,
+        "device": gpu_device.as_deref().unwrap_or("cpu"),
+        "budget_bytes": campuslingo_ingestion::ocr::MAX_MODEL_RSS_BYTES,
+        "restart_after_requests": campuslingo_ingestion::ocr::OCR_RESTART_AFTER_REQUESTS,
+        "decision": "DEC-017",
+    });
+    let config = ManagedOcrConfig {
+        binary,
+        model,
+        mmproj,
+        work_dir: work_dir.to_path_buf(),
+        lease_path,
+        threads,
+        context_size: 4096,
+        gpu_device,
+    };
+    Ok(ManagedOcrSpec {
+        spec: ManagedOcrWorkerSpec { config, model_name },
+        identity,
+    })
+}
+
+async fn build_managed_embedding_spec(
+    arguments: &[String],
+    work_dir: &Path,
+) -> Result<(ManagedEmbeddingConfig, Value), Error> {
+    let model =
+        PathBuf::from(option(arguments, "--embed-model").ok_or("--embed-model is required")?)
+            .canonicalize()?;
+    let binary = option(arguments, "--llama-server")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("llama-server"));
+    let lease_path = option(arguments, "--lease")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| default_lease_path(work_dir));
+    let threads = option(arguments, "--threads")
+        .map(|value| value.parse())
+        .transpose()?
+        .unwrap_or(8);
+    let gpu_device = resolve_device(&binary, option(arguments, "--embed-device")).await;
+    let model_id =
+        option(arguments, "--embed-model-id").unwrap_or_else(|| DEFAULT_EMBEDDING_MODEL_ID.into());
+    let revision =
+        option(arguments, "--embed-revision").unwrap_or_else(|| DEFAULT_EMBEDDING_REVISION.into());
+    let identity = json!({
+        "model": model.file_name().map(|name| name.to_string_lossy().into_owned()),
+        "model_id": &model_id,
+        "revision": &revision,
+        "preprocess_version": EMBEDDING_PREPROCESS_VERSION,
+        "dim": campuslingo_storage::ingestion::EMBEDDING_DIM,
+        "model_sha256": file_sha256(&model)?,
+        "threads": threads,
+        "device": gpu_device.as_deref().unwrap_or("cpu"),
+        "budget_bytes": campuslingo_ingestion::llama::MAX_MODEL_RSS_BYTES,
+    });
+    let config = ManagedEmbeddingConfig {
+        binary,
+        model,
+        work_dir: work_dir.to_path_buf(),
+        lease_path,
+        threads,
+        context_size: EMBEDDING_CONTEXT_SIZE,
+        gpu_device,
+        model_id,
+        revision,
+        preprocess_version: EMBEDDING_PREPROCESS_VERSION.into(),
+    };
+    Ok((config, identity))
+}
+
+struct ManagedOcr {
+    runtime: std::sync::Arc<ManagedOcrRuntime>,
+    client: OcrClient,
+}
+
+/// Start the managed local model and return the authenticated client together
+/// with non-secret provenance. The caller owns shutdown/release evidence.
+async fn start_managed_ocr(arguments: &[String], work_dir: &Path) -> Result<ManagedOcr, Error> {
+    let resolved = build_managed_ocr_spec(arguments, work_dir).await?;
+    let started = ManagedOcrRuntime::start(resolved.spec.config).await?;
+    let client = started.client(resolved.spec.model_name)?;
+    Ok(ManagedOcr {
+        runtime: started,
+        client,
+    })
+}
 
 fn option(arguments: &[String], name: &str) -> Option<String> {
     arguments
@@ -340,39 +489,13 @@ async fn extract(arguments: &[String]) -> Result<Value, Error> {
         config.render_dpi = dpi.parse()?;
     }
 
-    let managed = arguments.iter().any(|argument| argument == "--managed-ocr");
-    let mut server = None;
-    if managed {
-        let model = PathBuf::from(option(arguments, "--model").ok_or("--model is required")?)
-            .canonicalize()?;
-        let mmproj = PathBuf::from(option(arguments, "--mmproj").ok_or("--mmproj is required")?)
-            .canonicalize()?;
-        let binary = option(arguments, "--llama-server")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| PathBuf::from("llama-server"));
-        let lease_path = option(arguments, "--lease")
-            .map(PathBuf::from)
-            .unwrap_or_else(|| default_lease_path(&output));
-        let threads = option(arguments, "--threads")
-            .map(|value| value.parse())
-            .transpose()?
-            .unwrap_or(4);
-        let started = ManagedOcrServer::start(&ManagedOcrConfig {
-            binary,
-            model: model.clone(),
-            mmproj,
-            work_dir: output.clone(),
-            lease_path,
-            threads,
-            context_size: 4096,
-        })
-        .await?;
-        let model_name = model
-            .file_name()
-            .map(|name| name.to_string_lossy().into_owned())
-            .unwrap_or_else(|| "local-ocr".into());
-        config.ocr = Some(OcrClient::new(started.client_config(model_name))?);
-        server = Some(started);
+    let managed = if arguments.iter().any(|argument| argument == "--managed-ocr") {
+        Some(start_managed_ocr(arguments, &output).await?)
+    } else {
+        None
+    };
+    if let Some(managed) = &managed {
+        config.ocr = Some(managed.client.clone());
     } else if let (Some(endpoint), Some(model)) = (
         option(arguments, "--ocr-endpoint"),
         option(arguments, "--ocr-model"),
@@ -382,12 +505,22 @@ async fn extract(arguments: &[String]) -> Result<Value, Error> {
         )?);
     }
 
-    let manifest = ExtractionPipeline::new(config)
+    let result = ExtractionPipeline::new(config)
         .run(&pdf, run_id, None)
-        .await?;
-    if let Some(server) = server {
-        server.stop().await;
+        .await;
+    let model_restarts = managed.as_ref().map(|managed| managed.runtime.restarts());
+    let model_release = if let Some(managed) = managed {
+        Some(managed.runtime.stop().await?)
+    } else {
+        None
+    };
+    if model_release
+        .as_ref()
+        .is_some_and(|release| release.termination.is_some())
+    {
+        return Err("OCR worker resource failure; private release evidence retained".into());
     }
+    let manifest = result?;
     Ok(json!({
         "status": manifest.status,
         "run_id": manifest.run_id,
@@ -397,6 +530,8 @@ async fn extract(arguments: &[String]) -> Result<Value, Error> {
         "totals": manifest.totals,
         "model": manifest.model,
         "model_peak_rss_bytes": manifest.model_peak_rss_bytes,
+        "model_restarts": model_restarts,
+        "model_release": model_release,
         "failures": manifest.failures,
         "succeeded": manifest.status == RunStatus::Succeeded,
     }))
@@ -407,6 +542,31 @@ async fn run() -> Result<(), Error> {
     let result = match arguments.get(1).map(String::as_str) {
         Some("probe") => probe(&arguments).await?,
         Some("extract") => extract(&arguments).await?,
+        Some("worker-once")=>{
+            let url=std::env::var("CAMPUSLINGO_WORKER_DATABASE_URL").map_err(|_|"CAMPUSLINGO_WORKER_DATABASE_URL required")?;
+            let work_dir=PathBuf::from(option(&arguments,"--work-dir").ok_or("--work-dir required")?);
+            fs::create_dir_all(&work_dir)?;
+            let asset_dir=PathBuf::from(option(&arguments,"--asset-dir").ok_or("--asset-dir required")?);
+            let pool=sqlx::postgres::PgPoolOptions::new().max_connections(3).connect(&url).await?;
+            let mut config = WorkerConfig::new(work_dir.clone(), asset_dir);
+            if arguments.iter().any(|argument| argument == "--managed-ocr") {
+                let resolved = build_managed_ocr_spec(&arguments, &work_dir).await?;
+                config.managed_ocr = Some(resolved.spec);
+                config.ocr_provenance = Some(resolved.identity);
+            }
+            if arguments.iter().any(|argument| argument == "--managed-embeddings") {
+                let (embed_config, embed_identity) = build_managed_embedding_spec(&arguments, &work_dir).await?;
+                config.managed_embeddings = Some(embed_config);
+                config.embedding_provenance = Some(embed_identity);
+            }
+            campuslingo_ingestion::worker::work_once(&pool,&config).await?.unwrap_or_else(||json!({"status":"idle"}))
+        },
+        Some("region-probe") => {
+            let pdf=PathBuf::from(option(&arguments,"--pdf").ok_or("--pdf required")?).canonicalize()?;
+            let output=PathBuf::from(option(&arguments,"--output").ok_or("--output required")?);
+            let pages=option(&arguments,"--pages").ok_or("--pages required")?.split(',').map(str::parse::<u32>).collect::<Result<Vec<_>,_>>()?;
+            ExtractionPipeline::new(PipelineConfig::new(output)).probe_selected(&pdf,&pages,Uuid::new_v4()).await?
+        },
         Some("environment") => json!({"host":host_memory()?,"reserved_host_bytes":RESERVED_HOST_BYTES}),
         Some("onnx-probe") => {
             #[cfg(feature="onnx")]
@@ -414,7 +574,7 @@ async fn run() -> Result<(), Error> {
             #[cfg(not(feature="onnx"))]
             {json!({"status":"blocked","reason":"build with --features onnx and supply a compatible local ONNX Runtime library; no automatic binary download"})}
         },
-        _ => return Err("usage: campuslingo-ingestion environment | probe --model PATH --role generator|router [--port N] | extract --pdf PATH --output DIR [--run-id UUID] [--dpi N] [--managed-ocr --model PATH --mmproj PATH [--llama-server PATH] [--threads N] [--lease PATH]] | onnx-probe --library PATH".into()),
+        _ => return Err("usage: campuslingo-ingestion environment | region-probe --pdf PATH --pages 1,2,3 --output PRIVATE_DIR | probe --model PATH --role generator|router [--port N] | extract --pdf PATH --output DIR [--run-id UUID] [--dpi 150] [--managed-ocr --model PATH --mmproj PATH [--llama-server PATH] [--threads N] [--lease PATH]] | onnx-probe --library PATH".into()),
     };
     println!("{}", serde_json::to_string_pretty(&result)?);
     Ok(())
@@ -461,7 +621,15 @@ mod tests {
             validate_generated_sandbox(&value.to_string())["source_constraints_match"],
             true
         );
+        // Constant 13 is pre-solved at tick 0, so P-05 / S-12 rejects it directly.
         value["targets"][0]["expression"] = json!({"kind":"constant","value":13});
+        let constant_result = validate_generated_sandbox(&value.to_string());
+        assert_eq!(constant_result["sandbox"]["valid"], false);
+        assert_eq!(constant_result["source_constraints_match"], false);
+
+        // A fabricated variable expression (`power * 3`) is solvable without
+        // pre-solving tick 0, yet still fails source grounding (`power * 2`).
+        value["targets"][0]["expression"] = json!({"kind":"operation","op":"multiply","args":[{"kind":"variable","name":"power"},{"kind":"constant","value":3}]});
         let result = validate_generated_sandbox(&value.to_string());
         assert_eq!(result["sandbox"]["valid"], true);
         assert_eq!(result["source_constraints_match"], false);

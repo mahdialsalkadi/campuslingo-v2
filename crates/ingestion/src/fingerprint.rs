@@ -20,6 +20,7 @@ pub enum CriticalTokenKind {
     Unit,
     Formula,
     Negation,
+    Indentation,
 }
 
 impl CriticalTokenKind {
@@ -29,6 +30,7 @@ impl CriticalTokenKind {
             Self::Unit => "unit",
             Self::Formula => "formula",
             Self::Negation => "negation",
+            Self::Indentation => "indentation",
         }
     }
 }
@@ -318,6 +320,20 @@ pub fn critical_tokens(text: &str) -> Vec<CriticalToken> {
     let normalized = normalize_preserving_case(text);
     let bytes = normalized.as_bytes();
     let mut tokens = Vec::new();
+    // Normalization below collapses presentation whitespace. Protect leading
+    // indentation separately: in Python it can change program meaning.
+    for (line_index, line) in text.lines().enumerate() {
+        let prefix = line
+            .chars()
+            .take_while(|c| matches!(c, ' ' | '\t'))
+            .collect::<String>();
+        if !prefix.is_empty() {
+            tokens.push(CriticalToken {
+                kind: CriticalTokenKind::Indentation,
+                canonical: format!("{line_index}:{}", hex::encode(prefix.as_bytes())),
+            });
+        }
+    }
     let mut index = 0;
     while index < bytes.len() {
         while bytes.get(index).is_some_and(u8::is_ascii_whitespace) {
@@ -453,13 +469,13 @@ pub fn compare(existing: &ChunkFingerprint, candidate: &ChunkFingerprint) -> Ded
     }
 }
 
-/// Split on line and sentence boundaries without cutting through a token.
-/// Every input character is retained in exactly one returned chunk.
+/// Split lines without cutting through a token or rewriting their whitespace.
+/// Line separators stay in the page's verbatim source_text; every character
+/// inside a nonempty line is retained, including code indentation and tabs.
 pub fn chunk_text(text: &str, maximum_chars: usize) -> Vec<String> {
     let maximum_chars = maximum_chars.clamp(120, 4000);
     let mut chunks = Vec::new();
     for line in text.lines() {
-        let line = line.trim();
         if line.is_empty() {
             continue;
         }
@@ -467,19 +483,26 @@ pub fn chunk_text(text: &str, maximum_chars: usize) -> Vec<String> {
             chunks.push(line.to_owned());
             continue;
         }
-        let mut current = String::new();
-        for word in line.split_whitespace() {
-            let extra = word.chars().count() + usize::from(!current.is_empty());
-            if current.chars().count() + extra > maximum_chars && !current.is_empty() {
-                chunks.push(std::mem::take(&mut current));
-            }
-            if !current.is_empty() {
-                current.push(' ');
-            }
-            current.push_str(word);
+        let mut rest = line;
+        while rest.chars().count() > maximum_chars {
+            let boundary = rest
+                .char_indices()
+                .enumerate()
+                .take(maximum_chars)
+                .filter(|(_, (_, c))| c.is_whitespace())
+                .map(|(_, (i, c))| i + c.len_utf8())
+                .last()
+                .or_else(|| {
+                    rest.char_indices()
+                        .find(|(_, c)| c.is_whitespace())
+                        .map(|(i, c)| i + c.len_utf8())
+                });
+            let Some(boundary) = boundary else { break };
+            chunks.push(rest[..boundary].to_owned());
+            rest = &rest[boundary..];
         }
-        if !current.is_empty() {
-            chunks.push(current);
+        if !rest.is_empty() {
+            chunks.push(rest.to_owned());
         }
     }
     chunks
@@ -626,5 +649,11 @@ mod tests {
         let chunks = chunk_text(&long, 120);
         assert!(chunks.iter().all(|chunk| chunk.len() <= 120 + 5));
         assert_eq!(chunks.join(" ").split_whitespace().count(), 200);
+        let code = "    return  x\t!= 5";
+        assert_eq!(chunk_text(code, 120), [code]);
+        let long_code = format!("    {}", "x\t  ".repeat(100));
+        assert_eq!(chunk_text(&long_code, 120).concat(), long_code);
+        assert_eq!(duplicate("    return x", "return x"), None);
+        assert_eq!(duplicate("\treturn x", "    return x"), None);
     }
 }

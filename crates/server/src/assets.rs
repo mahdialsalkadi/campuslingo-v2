@@ -29,6 +29,8 @@ const ALLOWED_MEDIA_TYPES: &[&str] = &[
     "image/jpeg",
     "image/webp",
     "text/plain",
+    "audio/ogg",
+    "audio/opus",
 ];
 
 fn media_type_from(headers: &HeaderMap) -> ApiResult<String> {

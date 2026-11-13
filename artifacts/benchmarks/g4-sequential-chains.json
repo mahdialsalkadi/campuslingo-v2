@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "gate": "G-4",
+  "status": "passed",
+  "generated_at": "2026-11-13T09:31:19.396Z",
+  "provenance": {
+    "node_version": "v22.23.1",
+    "platform": "linux",
+    "arch": "x64",
+    "fsrs_algorithm": "FSRS-6",
+    "fsrs_crate_version": "7.0.0",
+    "wasm_sha256": "526c0c18e753eadf025b06573c3d73cf7837b136fc0bf4f3d5b2bffa93feec96",
+    "native_binary": "target/release/domain-eval"
+  },
+  "precision_policy": {
+    "tolerance": "abs_error <= 1e-6 + 1e-6 * abs(reference)",
+    "schedule_days_authority": "server_canonical",
+    "wasm_role": "advisory_preview",
+    "custom_s19_21_weights_verified": true
+  },
+  "totals": {
+    "chains": 4,
+    "steps_per_chain": 60,
+    "reviews_per_mode": 240,
+    "max_abs_error": 0.0003000000001520675,
+    "max_continuous_shield_abs_error": 1.0000000005838672e-7,
+    "self_evolving_scheduled_days_deltas": 0
+  },
+  "chains": [
+    {
+      "id": "steady_progression_default",
+      "steps": 60,
+      "desired_retention": 0.9,
+      "custom_s19_weights": false,
+      "decay": 0.1542,
+      "self_evolving_max_abs_error": 0.0003000000001520675,
+      "server_canonical_advisory_max_abs_error": 0.00009999999997489795,
+      "continuous_shield_max_abs_error": 0,
+      "self_evolving_scheduled_days_deltas": 0,
+      "final_stability": 2557.778,
+      "final_difficulty": 1
+    },
+    {
+      "id": "lapses_and_recovery_default",
+      "steps": 60,
+      "desired_retention": 0.9,
+      "custom_s19_weights": false,
+      "decay": 0.1542,
+      "self_evolving_max_abs_error": 0.00000269999999957804,
+      "server_canonical_advisory_max_abs_error": 0.000001500000000209667,
+      "continuous_shield_max_abs_error": 1.0000000005838672e-7,
+      "self_evolving_scheduled_days_deltas": 0,
+      "final_stability": 3.0355053,
+      "final_difficulty": 9.939931
+    },
+    {
+      "id": "high_retention_mixed_intervals",
+      "steps": 60,
+      "desired_retention": 0.95,
+      "custom_s19_weights": false,
+      "decay": 0.1542,
+      "self_evolving_max_abs_error": 0.000007000000000090267,
+      "server_canonical_advisory_max_abs_error": 0.000004000000000559112,
+      "continuous_shield_max_abs_error": 1.0000000005838672e-7,
+      "self_evolving_scheduled_days_deltas": 0,
+      "final_stability": 13.451965,
+      "final_difficulty": 9.84354
+    },
+    {
+      "id": "custom_s19_21_weights",
+      "steps": 60,
+      "desired_retention": 0.9,
+      "custom_s19_weights": true,
+      "decay": 0.21,
+      "self_evolving_max_abs_error": 0.000019999999999242846,
+      "server_canonical_advisory_max_abs_error": 0.000004999999999810711,
+      "continuous_shield_max_abs_error": 0,
+      "self_evolving_scheduled_days_deltas": 0,
+      "final_stability": 31.36171,
+      "final_difficulty": 9.313341
+    }
+  ]
+}

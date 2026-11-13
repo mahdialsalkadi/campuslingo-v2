@@ -7,7 +7,6 @@
 
 use std::{
     path::{Path, PathBuf},
-    process::Stdio,
     time::Duration,
 };
 
@@ -17,15 +16,30 @@ use thiserror::Error;
 use tokio::process::Command;
 use uuid::Uuid;
 
-use crate::pdf::{BBox, LayoutLine, PageLayout, PageRoute, PdfTools};
+use crate::pdf::{BBox, PageLayout, PdfTools};
+use crate::process::{HelperError, HelperLimits, run_helper};
 
 pub const MAX_CROPS_PER_PAGE: usize = 60;
-pub const MAX_CROP_DIMENSION: u32 = 4096;
+// A 1440pt lecture slide is 5000px wide at mandatory 250 DPI. Bound both
+// dimensions and total pixels, rather than silently clipping such source crops.
+pub const MAX_CROP_DIMENSION: u32 = 8192;
 pub const MIN_CROP_DIMENSION: u32 = 8;
 pub const MAX_CROP_BYTES: u64 = 8 * 1024 * 1024;
+const MAGICK_POLICY_DIR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/policy");
+const MAGICK_POLICY: &str = include_str!("../policy/policy.xml");
 
 #[derive(Debug, Error)]
 pub enum CropError {
+    #[error(transparent)]
+    Pdf(#[from] crate::pdf::PdfError),
+    #[error("the source region is below the minimum crop dimensions")]
+    TooSmall,
+    #[error("the source region exceeds the maximum crop dimensions")]
+    TooLarge,
+    #[error("the source render dimensions differ from the requested pixel rectangle")]
+    SourceRasterMismatch,
+    #[error(transparent)]
+    Helper(#[from] HelperError),
     #[error("the crop tool is unavailable")]
     Tool,
     #[error("the crop tool timed out")]
@@ -43,10 +57,12 @@ pub enum CropError {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum RegionKind {
+    Vector,
     Text,
     Image,
     OcrLine,
     Page,
+    Math,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -90,63 +106,22 @@ impl Default for CropTools {
     }
 }
 
-fn grouped_line_regions(layout: &PageLayout) -> Vec<Region> {
-    let mut groups: Vec<(BBox, Vec<&LayoutLine>)> = Vec::new();
-    for line in &layout.lines {
-        if line.text.trim().is_empty() || line.bbox.width() < 2.0 || line.bbox.height() < 2.0 {
-            continue;
+impl CropTools {
+    fn magick_command(&self) -> Result<Command, CropError> {
+        // A relocated binary must install the policy too, never silently fall
+        // back to a host's potentially permissive ImageMagick configuration.
+        if std::fs::read_to_string(Path::new(MAGICK_POLICY_DIR).join("policy.xml"))
+            .map_err(|_| CropError::Unsafe)?
+            != MAGICK_POLICY
+        {
+            return Err(CropError::Unsafe);
         }
-        let merge = groups.last().is_some_and(|(bbox, _)| {
-            let vertical_gap = line.bbox.y0 - bbox.y1;
-            let overlap = line.bbox.x0 < bbox.x1 && line.bbox.x1 > bbox.x0;
-            vertical_gap <= bbox.height().max(line.bbox.height()) * 0.8 && overlap
-        });
-        if merge {
-            let (bbox, lines) = groups.last_mut().expect("group exists");
-            bbox.x0 = bbox.x0.min(line.bbox.x0);
-            bbox.y0 = bbox.y0.min(line.bbox.y0);
-            bbox.x1 = bbox.x1.max(line.bbox.x1);
-            bbox.y1 = bbox.y1.max(line.bbox.y1);
-            lines.push(line);
-        } else {
-            groups.push((line.bbox, vec![line]));
-        }
+        let mut command = Command::new(&self.magick);
+        command
+            .env("MAGICK_CONFIGURE_PATH", MAGICK_POLICY_DIR)
+            .env("MAGICK_THREAD_LIMIT", "2");
+        Ok(command)
     }
-    groups
-        .into_iter()
-        .enumerate()
-        .map(|(index, (bbox, lines))| Region {
-            index: index as u32,
-            kind: RegionKind::Text,
-            bbox: bbox.padded(3.0, layout.width_pt, layout.height_pt),
-            text: Some(
-                lines
-                    .iter()
-                    .map(|line| line.text.as_str())
-                    .collect::<Vec<_>>()
-                    .join("\n"),
-            ),
-        })
-        .collect()
-}
-
-fn image_regions(layout: &PageLayout) -> Vec<Region> {
-    let page_area = (layout.width_pt * layout.height_pt).max(1.0);
-    layout
-        .images
-        .iter()
-        .filter(|image| {
-            let area = image.bbox.width() * image.bbox.height();
-            image.bbox.width() >= 24.0 && image.bbox.height() >= 24.0 && area / page_area < 0.8
-        })
-        .enumerate()
-        .map(|(index, image)| Region {
-            index: index as u32,
-            kind: RegionKind::Image,
-            bbox: image.bbox.padded(2.0, layout.width_pt, layout.height_pt),
-            text: None,
-        })
-        .collect()
 }
 
 #[derive(Debug, Deserialize)]
@@ -271,33 +246,28 @@ fn parse_tsv(tsv: &str) -> Vec<(BBox, String)> {
         .collect()
 }
 
-async fn tesseract_regions(
+pub(crate) async fn tesseract_regions(
     tesseract: &Path,
     page_png: &Path,
     dpi: u32,
     page_width_pt: f32,
     page_height_pt: f32,
 ) -> Result<Vec<Region>, CropError> {
-    let output = tokio::time::timeout(
-        Duration::from_secs(45),
+    let output = run_helper(
         Command::new(tesseract)
             .arg(page_png)
             .arg("stdout")
             .arg("tsv")
-            .env("LC_ALL", "C.UTF-8")
-            .stdin(Stdio::null())
-            .stderr(Stdio::null())
-            .output(),
+            .env("LC_ALL", "C.UTF-8"),
+        HelperLimits::pdf(Duration::from_secs(45), crate::pdf::MAX_XML_BYTES),
     )
-    .await
-    .map_err(|_| CropError::Timeout)?
-    .map_err(|_| CropError::Tool)?;
+    .await?;
     if !output.status.success() {
         return Err(CropError::Tool);
     }
     let tsv = String::from_utf8_lossy(&output.stdout);
     let scale = 72.0 / dpi as f32;
-    let mut regions: Vec<Region> = parse_tsv(&tsv)
+    let regions: Vec<Region> = parse_tsv(&tsv)
         .into_iter()
         .filter(|(bbox, _)| bbox.width() >= 8.0 && bbox.height() >= 6.0)
         .enumerate()
@@ -313,62 +283,126 @@ async fn tesseract_regions(
             text: (!text.is_empty()).then_some(text),
         })
         .collect();
-    if regions.is_empty() {
-        regions.push(Region {
-            index: 0,
-            kind: RegionKind::Page,
-            bbox: BBox {
-                x0: 0.0,
-                y0: 0.0,
-                x1: page_width_pt,
-                y1: page_height_pt,
-            },
-            text: None,
-        });
-    }
     Ok(regions)
 }
 
-pub async fn select_regions(
+/// Render the selected source rectangle at 250 DPI and encode without resizing.
+/// Input SHA, original rectangle and region index are part of the identity, so
+/// retrying a run with changed PDF bytes cannot reuse a stale crop.
+#[allow(clippy::too_many_arguments)]
+pub async fn crop_pdf_region(
     tools: &CropTools,
+    source: &Path,
     layout: &PageLayout,
-    route: PageRoute,
-    page_png: &Path,
-    dpi: u32,
-) -> Result<Vec<Region>, CropError> {
-    let mut regions = match route {
-        PageRoute::Ocr => {
-            tesseract_regions(
-                &tools.tesseract,
-                page_png,
-                dpi,
-                layout.width_pt,
-                layout.height_pt,
-            )
-            .await?
-        }
-        PageRoute::Digital | PageRoute::Hybrid => {
-            let mut regions = grouped_line_regions(layout);
-            let images = image_regions(layout);
-            for (next, mut image) in (regions.len() as u32..).zip(images) {
-                image.index = next;
-                regions.push(image);
-            }
-            regions
-        }
-        PageRoute::Blank => Vec::new(),
-    };
-    regions.sort_by(|left, right| {
-        left.bbox
-            .y0
-            .total_cmp(&right.bbox.y0)
-            .then(left.bbox.x0.total_cmp(&right.bbox.x0))
-    });
-    regions.truncate(MAX_CROPS_PER_PAGE);
-    for (index, region) in regions.iter_mut().enumerate() {
-        region.index = index as u32;
+    run_dir: &Path,
+    run_id: Uuid,
+    input_sha256: &str,
+    region: &Region,
+) -> Result<(CropOutput, PathBuf), CropError> {
+    let pixels = crate::pdf::pixel_bbox(region.bbox, layout.width_pt, layout.height_pt, 250)
+        .map_err(|_| CropError::Unsafe)?;
+    if pixels[2] > MAX_CROP_DIMENSION || pixels[3] > MAX_CROP_DIMENSION {
+        return Err(CropError::TooLarge);
     }
-    Ok(regions)
+    if pixels[2] < MIN_CROP_DIMENSION || pixels[3] < MIN_CROP_DIMENSION {
+        return Err(CropError::TooSmall);
+    }
+    let mut hash = Sha256::new();
+    hash.update(b"source-crop-v1");
+    hash.update(run_id.as_bytes());
+    hash.update(input_sha256.as_bytes());
+    hash.update(layout.page_number.to_le_bytes());
+    hash.update(region.index.to_le_bytes());
+    for pixel in pixels {
+        hash.update(pixel.to_le_bytes())
+    }
+    let digest = hash.finalize();
+    let mut id = [0; 16];
+    id.copy_from_slice(&digest[..16]);
+    let id = Uuid::from_bytes(id);
+    let png = tools
+        .pdf
+        .render_region_png(
+            source,
+            layout.page_number,
+            region.bbox,
+            (layout.width_pt, layout.height_pt),
+            &run_dir.join("pages").join(format!("region-{id}")),
+        )
+        .await?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        tokio::fs::set_permissions(&png, std::fs::Permissions::from_mode(0o600))
+            .await
+            .map_err(|_| CropError::Io)?;
+    }
+    let decoded = crate::raster::Raster::load(&png).map_err(|_| CropError::Unsafe)?;
+    if decoded.width != pixels[2] || decoded.height != pixels[3] {
+        return Err(CropError::SourceRasterMismatch);
+    }
+    let final_path = run_dir.join("crops").join(format!("{id}.webp"));
+    let temporary = final_path.with_extension("tmp.webp");
+    let result = run_helper(
+        tools
+            .magick_command()?
+            .arg(&png)
+            .args(["-strip", "-quality", "82", "-define", "webp:method=4"])
+            .arg(&temporary),
+        HelperLimits::pdf(Duration::from_secs(45), 64 * 1024),
+    )
+    .await;
+    let output = match result {
+        Ok(output) => output,
+        Err(error) => {
+            let _ = tokio::fs::remove_file(&temporary).await;
+            return Err(error.into());
+        }
+    };
+    if !output.status.success() {
+        let _ = tokio::fs::remove_file(&temporary).await;
+        return Err(CropError::Encode);
+    }
+    let metadata = tokio::fs::metadata(&temporary)
+        .await
+        .map_err(|_| CropError::Io)?;
+    if metadata.len() == 0 || metadata.len() > MAX_CROP_BYTES {
+        let _ = tokio::fs::remove_file(&temporary).await;
+        return Err(CropError::Unsafe);
+    }
+    let bytes = tokio::fs::read(&temporary)
+        .await
+        .map_err(|_| CropError::Io)?;
+    if webp_dimensions(&bytes) != Some((pixels[2], pixels[3])) {
+        return Err(CropError::InvalidWebp);
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        tokio::fs::set_permissions(&temporary, std::fs::Permissions::from_mode(0o600))
+            .await
+            .map_err(|_| CropError::Io)?;
+    }
+    tokio::fs::rename(&temporary, &final_path)
+        .await
+        .map_err(|_| CropError::Io)?;
+    Ok((
+        CropOutput {
+            id,
+            region_index: region.index,
+            kind: region.kind,
+            bbox: region.bbox,
+            pixel_bbox: pixels,
+            width: pixels[2],
+            height: pixels[3],
+            dpi: 250,
+            sha256: hex::encode(Sha256::digest(&bytes)),
+            bytes: bytes.len() as u64,
+            relative_path: format!("crops/{id}.webp"),
+            text: region.text.clone(),
+        },
+        png,
+    ))
 }
 
 fn webp_dimensions(bytes: &[u8]) -> Option<(u32, u32)> {
@@ -412,6 +446,7 @@ fn webp_dimensions(bytes: &[u8]) -> Option<(u32, u32)> {
 /// Crop one region. The temporary file keeps a `.webp` suffix so ImageMagick
 /// selects the encoder, then is atomically renamed and restricted to 0600.
 #[allow(clippy::too_many_arguments)]
+#[cfg(test)]
 pub async fn crop_region(
     tools: &CropTools,
     page_png: &Path,
@@ -458,9 +493,9 @@ pub async fn crop_region(
     if !final_path.exists() {
         let temp_path = output_dir.join(format!("{crop_id}.tmp.webp"));
         let crop = format!("{width}x{height}+{x0}+{y0}");
-        let output = tokio::time::timeout(
-            Duration::from_secs(45),
-            Command::new(&tools.magick)
+        let output = run_helper(
+            tools
+                .magick_command()?
                 .arg(page_png)
                 .arg("-crop")
                 .arg(&crop)
@@ -471,14 +506,10 @@ pub async fn crop_region(
                 .arg("-define")
                 .arg("webp:method=4")
                 .arg(&temp_path)
-                .env("LC_ALL", "C.UTF-8")
-                .stdin(Stdio::null())
-                .stderr(Stdio::null())
-                .output(),
+                .env("LC_ALL", "C.UTF-8"),
+            HelperLimits::pdf(Duration::from_secs(45), 64 * 1024),
         )
-        .await
-        .map_err(|_| CropError::Timeout)?
-        .map_err(|_| CropError::Tool)?;
+        .await?;
         if !output.status.success() {
             let _ = tokio::fs::remove_file(&temp_path).await;
             return Err(CropError::Encode);
@@ -549,5 +580,80 @@ mod tests {
         bytes[24] = 99;
         bytes[27] = 49;
         assert_eq!(webp_dimensions(&bytes), Some((100, 50)));
+    }
+
+    #[tokio::test]
+    #[ignore = "requires local Poppler/ImageMagick and delegated helper cgroup"]
+    async fn raster_crop_policy_allows_png_to_webp_and_denies_other_coders() {
+        let directory = tempfile::tempdir().unwrap();
+        let tools = CropTools::default();
+        let source = crate::project_root().join("tests/fixtures/m2/annotated-english.pdf");
+        let png = tools
+            .pdf
+            .render_png(&source, 1, 150, &directory.path().join("page"))
+            .await
+            .unwrap();
+        let geometry = tesseract_regions(&tools.tesseract, &png, 150, 612.0, 792.0)
+            .await
+            .unwrap();
+        assert!(
+            geometry
+                .iter()
+                .any(|region| region.kind == RegionKind::OcrLine)
+        );
+        let probe = run_helper(
+            tools
+                .magick_command()
+                .unwrap()
+                .arg(&png)
+                .arg("-crop")
+                .arg("376x168+41+41")
+                .arg("+repage")
+                .arg(directory.path().join("probe.webp")),
+            HelperLimits::pdf(Duration::from_secs(5), 64 * 1024),
+        )
+        .await
+        .unwrap();
+        assert!(
+            probe.status.success(),
+            "synthetic PNG probe: {}",
+            String::from_utf8_lossy(&probe.stderr)
+        );
+        let output = crop_region(
+            &tools,
+            &png,
+            612.0,
+            792.0,
+            150,
+            directory.path(),
+            Uuid::new_v4(),
+            1,
+            &Region {
+                index: 0,
+                kind: RegionKind::Text,
+                bbox: BBox {
+                    x0: 20.0,
+                    y0: 20.0,
+                    x1: 200.0,
+                    y1: 100.0,
+                },
+                text: None,
+            },
+        )
+        .await
+        .unwrap();
+        assert!(output.bytes > 0);
+        assert_eq!(output.width, 376);
+        let output = run_helper(
+            tools
+                .magick_command()
+                .unwrap()
+                .arg("label:forbidden")
+                .arg(directory.path().join("denied.webp")),
+            HelperLimits::pdf(Duration::from_secs(5), 64 * 1024),
+        )
+        .await
+        .unwrap();
+        assert!(!output.status.success());
     }
 }

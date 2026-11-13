@@ -125,6 +125,13 @@ pub async fn get_job(pool: &PgPool, actor: Uuid, course_id: Uuid, job_id: Uuid) 
 /// Worker-role operation. There is intentionally no actor parameter: the worker
 /// role has BYPASSRLS, and its credentials never reach the HTTP server.
 pub async fn reaper_and_claim(pool: &PgPool) -> Result<Option<ClaimedJob>> {
+    reaper_and_claim_kind(pool, None).await
+}
+
+pub async fn reaper_and_claim_kind(
+    pool: &PgPool,
+    kind: Option<&str>,
+) -> Result<Option<ClaimedJob>> {
     sqlx::query(
         "UPDATE jobs
          SET status = 'failed', lease_token = NULL, lease_until = NULL,
@@ -141,7 +148,8 @@ pub async fn reaper_and_claim(pool: &PgPool) -> Result<Option<ClaimedJob>> {
              SELECT id FROM jobs
              WHERE (status = 'queued'
                     OR (status = 'running' AND lease_until < clock_timestamp()))
-               AND attempts < max_attempts
+                AND attempts < max_attempts
+                AND ($2::text IS NULL OR payload->>'kind'=$2)
              ORDER BY created_at
              FOR UPDATE SKIP LOCKED
              LIMIT 1
@@ -157,6 +165,7 @@ pub async fn reaper_and_claim(pool: &PgPool) -> Result<Option<ClaimedJob>> {
                    j.attempts, j.max_attempts, j.lease_token",
     )
     .bind(lease_token)
+    .bind(kind)
     .fetch_optional(pool)
     .await?;
     Ok(job)
@@ -179,7 +188,7 @@ pub async fn heartbeat(
          SET stage = $3, progress_done = $4, progress_total = $5,
              lease_until = clock_timestamp() + interval '60 seconds',
              updated_at = clock_timestamp()
-         WHERE id = $1 AND lease_token = $2 AND status = 'running'",
+          WHERE id = $1 AND lease_token = $2 AND status = 'running' AND lease_until > clock_timestamp()",
     )
     .bind(job_id)
     .bind(lease_token)
@@ -225,7 +234,7 @@ pub async fn complete(
          SET status = 'succeeded', lease_token = NULL, lease_until = NULL,
              stage = 'succeeded', progress_done = progress_total,
              updated_at = clock_timestamp()
-         WHERE id = $1 AND lease_token = $2 AND status = 'running'",
+          WHERE id = $1 AND lease_token = $2 AND status = 'running' AND lease_until > clock_timestamp()",
     )
     .bind(job_id)
     .bind(lease_token)
@@ -264,7 +273,7 @@ pub async fn fail(
     let mut transaction = pool.begin().await?;
     let row = sqlx::query_as::<_, (i32, i32)>(
         "SELECT attempts, max_attempts FROM jobs
-         WHERE id = $1 AND lease_token = $2 AND status = 'running'
+          WHERE id = $1 AND lease_token = $2 AND status = 'running' AND lease_until > clock_timestamp()
          FOR UPDATE",
     )
     .bind(job_id)

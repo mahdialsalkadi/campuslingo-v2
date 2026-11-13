@@ -1,0 +1,474 @@
+/* M4 Strategy Shell responsive rules: P-06 >= 44px targets, 360px 55%/45%, >=1024px 65%/35%. */
+
+.m4-shell {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: #0b1322;
+  color: #e2e8f0;
+  transition: background-color 180ms ease;
+}
+
+.m4-shell.theme-bio-system {
+  background: linear-gradient(155deg, #061b19 0%, #0d2b27 100%);
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+.m4-shell.theme-cyber-grid {
+  background: linear-gradient(155deg, #070d1d 0%, #101f3d 100%);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.m4-shell.theme-macro-polis {
+  background: linear-gradient(155deg, #17120c 0%, #2a2015 100%);
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.m4-shell.theme-arcane-archive {
+  background: linear-gradient(155deg, #110c21 0%, #231942 100%);
+  border-color: rgba(167, 139, 250, 0.35);
+}
+
+.m4-header,
+.m4-toolbar,
+.m4-theme-group,
+.m4-mode-group,
+.m4-voice-controls,
+.m4-fortress-node-pills,
+.m4-archetype-tabs,
+.m4-modifier-tabs,
+.m4-telemetry-strip,
+.m4-report-row,
+.m4-target-eval-row,
+.m4-subhead {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  max-width: 100%;
+}
+
+.m4-header {
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.m4-title {
+  margin: 2px 0 0;
+  font-size: 1.25rem;
+}
+
+.m4-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.m4-viewport-pane,
+.m4-control-deck {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Mobile 360px portrait split ~55% top viewport / ~45% control deck below */
+.m4-3d-stage,
+.m4-2d-stage {
+  width: 100%;
+  min-height: 270px;
+  height: 48vh;
+  max-height: 460px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(2, 6, 23, 0.65);
+}
+
+.m4-2d-stage[hidden],
+.m4-3d-stage[hidden] {
+  display: none;
+}
+
+.fortress-webgl-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .m4-workspace {
+    grid-template-columns: minmax(0, 65fr) minmax(0, 35fr);
+    align-items: start;
+  }
+
+  .m4-3d-stage,
+  .m4-2d-stage {
+    height: 440px;
+  }
+}
+
+.m4-subpanel,
+.m4-voice-bar {
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.m4-subpanel h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.m4-node-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+  margin: 6px 0;
+}
+
+.m4-preset-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 8px 0;
+  font-size: 0.85rem;
+}
+
+.m4-telemetry-strip span {
+  font-size: 0.78rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+}
+
+.m4-muted-note {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.m4-shell button,
+.m4-shell input[type="range"] {
+  min-width: 44px;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.m4-shell input[type="range"] {
+  height: 44px;
+  margin: 0;
+}
+
+.m4-caption-text,
+.m4-muted-note,
+.target-readout {
+  overflow-wrap: anywhere;
+}
+
+.m4-shell button {
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(30, 41, 59, 0.88);
+  color: #f8fafc;
+  cursor: pointer;
+}
+
+.m4-shell button[aria-pressed="true"] {
+  outline: 2px solid #38bdf8;
+  background: rgba(14, 116, 144, 0.55);
+}
+
+.m4-shell .warn-btn {
+  border-color: rgba(249, 115, 22, 0.65);
+}
+
+.m4-shell .accent-btn {
+  border-color: rgba(45, 212, 191, 0.65);
+}
+
+.m4-shell .param-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.m4-shell .param-slider {
+  flex: 1 1 120px;
+  min-width: 88px;
+}
+
+.fallback-2d-shell {
+  padding: 10px;
+  height: 100%;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fallback-dag-svg {
+  width: 100%;
+  height: 110px;
+  background: rgba(2, 6, 23, 0.45);
+  border-radius: 8px;
+}
+
+.fallback-node-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 6px;
+}
+
+.fallback-node-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: left;
+  min-height: 48px;
+}
+
+.fallback-node-btn.is-selected {
+  outline: 2px solid #2dd4bf;
+}
+
+.badge-chip {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+.badge-safe {
+  border-color: #38bdf8;
+  color: #bae6fd;
+}
+
+.badge-warn {
+  border-color: #f97316;
+  color: #fed7aa;
+}
+
+.fallback-schematic-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.metric-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  background: rgba(30, 41, 59, 0.75);
+}
+
+body.compact-test .m4-shell button,
+body.compact-test .m4-shell input[type="range"] {
+  min-width: 24px;
+  min-height: 24px;
+  width: 24px;
+  height: 24px;
+  padding: 2px;
+  font-size: 9px;
+}
+
+.m5-duel-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.m5-duel-badges,
+.m5-hand-row,
+.m5-duel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.m5-lanes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 6px;
+  max-width: 100%;
+}
+
+.m5-lane-card,
+.m5-hand-card {
+  min-height: 44px;
+  min-width: 44px;
+  text-align: left;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.m5-energy-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.m5-toast-layer {
+  pointer-events: none;
+  max-width: 100%;
+}
+
+.m5-toast-card {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.7);
+  background: rgba(15, 23, 42, 0.94);
+  color: #f8fafc;
+  font-size: 0.78rem;
+}
+
+.m5-toast-overcharge {
+  border-color: #2dd4bf;
+}
+
+.m5-toast-warn {
+  border-color: #f97316;
+}
+
+.m5-toast-skip {
+  min-width: 44px;
+  min-height: 44px;
+  flex-shrink: 0;
+}
+
+.m6-ops-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.m6-econ-badges,
+.m6-tab-row,
+.m6-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.m6-tab-btn {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.m6-caps-row {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  word-break: break-word;
+}
+
+.m6-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.m6-item-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.m6-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.78rem;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.m4-shell {
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-right: max(12px, env(safe-area-inset-right));
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding-left: max(12px, env(safe-area-inset-left));
+}
+
+.m7-pwa-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.m7-pwa-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.m7-rtl-preview {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.72);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.m7-math-ltr {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(56, 189, 248, 0.16);
+  color: #e0f2fe;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+[dir="rtl"] .m4-subhead {
+  flex-direction: row-reverse;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .m4-shell {
+    transition: none;
+  }
+}

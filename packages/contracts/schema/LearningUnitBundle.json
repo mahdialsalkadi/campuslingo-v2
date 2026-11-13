@@ -4,7 +4,8 @@
       "enum": [
         "model_durations",
         "forced_alignment",
-        "asr_estimate"
+        "asr_estimate",
+        "CLAUSE_CONCAT"
       ],
       "type": "string"
     },
@@ -31,6 +32,12 @@
         "codec": {
           "$ref": "#/$defs/Codec"
         },
+        "degraded": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
         "duration_ms": {
           "format": "uint32",
           "minimum": 0,
@@ -38,6 +45,25 @@
         },
         "language": {
           "$ref": "#/$defs/Language"
+        },
+        "normalized_wer": {
+          "format": "double",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "quality_gate_passed": {
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "quality_note": {
+          "type": [
+            "string",
+            "null"
+          ]
         },
         "text": {
           "type": "string"

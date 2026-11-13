@@ -176,6 +176,8 @@ pub enum AlignmentMethod {
     ModelDurations,
     ForcedAlignment,
     AsrEstimate,
+    #[serde(rename = "CLAUSE_CONCAT")]
+    ClauseConcat,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
@@ -196,6 +198,14 @@ pub struct AudioManifest {
     pub duration_ms: u32,
     pub alignment_method: AlignmentMethod,
     pub words: Vec<AudioWord>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub degraded: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quality_gate_passed: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub normalized_wer: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub quality_note: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]

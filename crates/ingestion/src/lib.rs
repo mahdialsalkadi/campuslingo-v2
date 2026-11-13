@@ -1,20 +1,39 @@
 //! Production model lifecycle primitives. Python is not part of this worker.
 
+pub mod calibration;
+pub mod consolidation;
 pub mod crops;
+pub mod embeddings;
 pub mod fingerprint;
+pub mod generator;
+pub mod llama;
 pub mod ocr;
 pub mod pdf;
 pub mod pipeline;
+pub mod process;
+pub mod raster;
+pub mod regions;
+pub mod tts;
+pub mod vectors;
+pub mod worker;
 
 use fs2::FileExt;
 use serde::Serialize;
 use std::{
     fs::{self, File, OpenOptions},
     io,
+    os::unix::fs::{OpenOptionsExt, PermissionsExt},
     path::{Path, PathBuf},
 };
 
 pub const RESERVED_HOST_BYTES: u64 = 3 * 1024 * 1024 * 1024;
+/// Frozen O-01 admission floor. Model stages may require additional headroom;
+/// this floor is not a replacement for their separately measured budgets.
+pub const INGESTION_ADMISSION_RESERVE_BYTES: u64 = 1536 * 1024 * 1024;
+
+pub fn admits_ingestion(available_bytes: u64) -> bool {
+    available_bytes >= INGESTION_ADMISSION_RESERVE_BYTES
+}
 
 #[derive(Debug, Serialize)]
 pub struct HostMemory {
@@ -102,6 +121,7 @@ pub fn external_model_pids() -> io::Result<Vec<u32>> {
 
 pub struct ModelLease {
     file: File,
+    global_file: Option<File>,
 }
 
 impl ModelLease {
@@ -114,8 +134,44 @@ impl ModelLease {
             .write(true)
             .create(true)
             .truncate(false)
+            .mode(0o600)
+            .custom_flags(libc::O_NOFOLLOW)
             .open(path)?;
-        FileExt::try_lock_exclusive(&file)?;
+        if !file.metadata()?.is_file() {
+            return Err(io::Error::other("model lease is not a regular file"));
+        }
+        file.set_permissions(fs::Permissions::from_mode(0o600))?;
+        let global_path = project_root().join("artifacts/private/models.lock");
+        if let Some(parent) = global_path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+        let global = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .truncate(false)
+            .mode(0o600)
+            .custom_flags(libc::O_NOFOLLOW)
+            .open(&global_path)?;
+        if !global.metadata()?.is_file() {
+            return Err(io::Error::other("global model lease is not a regular file"));
+        }
+        global.set_permissions(fs::Permissions::from_mode(0o600))?;
+        FileExt::try_lock_exclusive(&global)?;
+        let same_file = {
+            use std::os::unix::fs::MetadataExt;
+            let a = file.metadata()?;
+            let b = global.metadata()?;
+            a.dev() == b.dev() && a.ino() == b.ino()
+        };
+        // When both paths identify the same inode, keep the description that
+        // owns the flock, not the separately opened/unlocked description.
+        let (file, global_file) = if same_file {
+            (global, None)
+        } else {
+            FileExt::try_lock_exclusive(&file)?;
+            (file, Some(global))
+        };
         if host_memory()?.available_bytes < reserve_bytes {
             return Err(io::Error::other("insufficient host memory headroom"));
         }
@@ -124,13 +180,16 @@ impl ModelLease {
                 "existing model process detected; no user service was stopped",
             ));
         }
-        Ok(Self { file })
+        Ok(Self { file, global_file })
     }
 }
 
 impl Drop for ModelLease {
     fn drop(&mut self) {
         let _ = FileExt::unlock(&self.file);
+        if let Some(global) = &self.global_file {
+            let _ = FileExt::unlock(global);
+        }
     }
 }
 
@@ -144,14 +203,20 @@ pub fn project_root() -> PathBuf {
 #[cfg(feature = "onnx")]
 pub fn probe_onnx_library(path: &Path) -> Result<(), Box<dyn std::error::Error>> {
     // No automatic runtime/model download. A TTS job will hold ModelLease while
-    // owning its environment and Session; this worker is separate from the API.
-    let _environment = ort::init_from(path)?.build()?;
+    // owning its Session; this worker is separate from the API.
+    tts::onnx_runtime::ensure_onnx_environment(path)?;
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn admission_uses_the_frozen_one_point_five_gib_boundary() {
+        assert!(!admits_ingestion(INGESTION_ADMISSION_RESERVE_BYTES - 1));
+        assert!(admits_ingestion(INGESTION_ADMISSION_RESERVE_BYTES));
+        assert!(admits_ingestion(INGESTION_ADMISSION_RESERVE_BYTES + 1));
+    }
     #[test]
     fn host_snapshot_is_readable() {
         let memory = host_memory().unwrap();
@@ -165,8 +230,16 @@ mod tests {
         ));
         let first = ModelLease::acquire(&path, 0).unwrap();
         assert!(ModelLease::acquire(&path, 0).is_err());
+        let other = path.with_extension("other.lock");
+        assert!(
+            ModelLease::acquire(&other, 0).is_err(),
+            "different output directories cannot bypass the global model lease"
+        );
         drop(first);
         assert!(ModelLease::acquire(&path, 0).is_ok());
         fs::remove_file(path).unwrap();
+        if other.exists() {
+            fs::remove_file(other).unwrap();
+        }
     }
 }

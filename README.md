@@ -3,7 +3,7 @@
 New mobile-first learning strategy game. This is **not** an upgrade of
 `/home/mahdi/campus-lingo`; that project and its data remain read-only references.
 
-## Current stage: M1 authenticated foundation
+## Current stage: M2 ingestion (in progress)
 
 This repository contains a Rust/WASM domain engine, an authenticated axum
 backend with PostgreSQL persistence, private asset delivery, durable jobs, a
@@ -15,7 +15,8 @@ Native/WASM tests use the explicitly user-approved f32-aware memory policy:
 `abs_error <= 1e-6 + 1e-6 * abs(reference)`. Discrete outcomes stay exact;
 absolute-only drift is preserved as a diagnostic. The seeded generation smoke
 probe passes; broader model/quality acceptance remains open. See [M0 status](docs/m0-status.md)
-and [M1 status](docs/m1-status.md).
+and [M1 status](docs/m1-status.md). Current ingestion evidence and remaining
+work are tracked in [M2 status](docs/m2-status.md).
 
 ## Runtime architecture
 
@@ -133,6 +134,27 @@ npm run m1:load
 Both commands remove their private cluster unless `CAMPUSLINGO_KEEP_PG=1` is set.
 See [M1 status](docs/m1-status.md) for the measured results and the explicit
 limits (not a 15-duel/combat benchmark).
+
+### M2 contained PDF/crop helpers
+
+```sh
+bash scripts/verify_m2_containment.sh
+```
+
+This runs local synthetic/helper tests in a disposable systemd user service
+with delegated cgroup-v2 memory accounting; it does not modify existing services
+or load models. Outside this harness, extraction requires
+`CAMPUSLINGO_HELPER_CGROUP_ROOT` pointing to an empty delegated parent with its
+memory controller enabled. Missing delegation fails closed. The ImageMagick
+crop worker also requires the checked policy at `crates/ingestion/policy/policy.xml`.
+See [M2 status](docs/m2-status.md) for coverage and remaining gates.
+
+Region extraction now uses independent raster/math/text actions, CropBox-aware
+150-DPI overlays and 250-DPI source crops. The private, no-LLM real-PDF
+probe and its numeric artifact checker are documented in
+[M2 region evidence](docs/m2-region-evidence.md). Vector clustering and
+consolidation are implemented; authoritative OCR and annotated acceptance remain
+open, so current runs explicitly report partial coverage.
 
 Offline Python evaluations never copy or upload the supplied lecture PDFs.
 They are not a production ingestion path. The PyMuPDF dependency is AGPL/commercial

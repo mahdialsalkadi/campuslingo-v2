@@ -29,4 +29,5 @@ name = "campuslingo-recovery-worker"
 path = "src/bin/recovery_worker.rs"
 
 [dev-dependencies]
+campuslingo-ingestion = { path = "../ingestion" }
 tower = { version = "=0.5.3", features = ["util"] }

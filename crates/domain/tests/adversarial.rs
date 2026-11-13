@@ -115,20 +115,35 @@ fn all_targets_must_have_one_joint_witness() {
 }
 
 #[test]
+fn pre_solved_initial_state_at_tick_zero_is_rejected() {
+    let mut value = fixture();
+    value["parameters"][0]["initial"] = json!(6);
+    let spec: SandboxSpec = serde_json::from_value(value).unwrap();
+    let result = sandbox::verify(&spec).unwrap();
+    assert!(!result.valid);
+    assert!(result.witness.is_none());
+    assert!(result.reason.contains("initial state already satisfies"));
+    assert_eq!(result.states_checked, 11);
+}
+
+#[test]
 fn continuous_shields_are_not_rounded_to_scheduler_days() {
     let at_zero = shield(&ShieldInput {
         stability: 5.0,
         elapsed_days: 0.0,
+        decay: None,
     })
     .unwrap();
     let halfway = shield(&ShieldInput {
         stability: 5.0,
         elapsed_days: 0.5,
+        decay: None,
     })
     .unwrap();
     let at_stability = shield(&ShieldInput {
         stability: 5.0,
         elapsed_days: 5.0,
+        decay: None,
     })
     .unwrap();
     assert_eq!(at_zero, 1.0);
@@ -137,7 +152,8 @@ fn continuous_shields_are_not_rounded_to_scheduler_days() {
     assert_eq!(
         shield(&ShieldInput {
             stability: 0.0,
-            elapsed_days: 0.0
+            elapsed_days: 0.0,
+            decay: None,
         })
         .unwrap(),
         0.0

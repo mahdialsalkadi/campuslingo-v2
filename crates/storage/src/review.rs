@@ -146,6 +146,7 @@ pub async fn answer_attempt(
         elapsed_days,
         rating,
         desired_retention: 0.9,
+        parameters: None,
     })
     .map_err(|_| StorageError::Invalid("invalid memory state"))?;
 

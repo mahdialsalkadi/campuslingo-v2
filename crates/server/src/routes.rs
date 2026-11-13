@@ -543,6 +543,84 @@ async fn get_job(
     ))
 }
 
+async fn ingestion_run(
+    State(state): State<AppState>,
+    Path((course, run)): Path<(Uuid, Uuid)>,
+    headers: HeaderMap,
+) -> ApiResult<Json<campuslingo_storage::ingestion::RunView>> {
+    let actor = require_actor(&state, &headers).await?;
+    Ok(Json(
+        campuslingo_storage::ingestion::run_for_manager(&state.app_pool, actor, course, run)
+            .await?,
+    ))
+}
+
+async fn ingestion_crop(
+    State(state): State<AppState>,
+    Path((course, crop)): Path<(Uuid, Uuid)>,
+    headers: HeaderMap,
+) -> ApiResult<Response> {
+    let actor = require_actor(&state, &headers).await?;
+    let asset =
+        campuslingo_storage::ingestion::crop_asset_for_read(&state.app_pool, actor, course, crop)
+            .await?;
+    // The ordinary asset route reauthorizes immediately before streaming.
+    assets::download_asset(State(state), Path(asset), headers).await
+}
+
+async fn get_course_shields(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(course_id): Path<Uuid>,
+) -> ApiResult<Json<campuslingo_storage::shields::CourseShieldDashboard>> {
+    let actor = require_actor(&state, &headers).await?;
+    Ok(Json(
+        campuslingo_storage::shields::get_course_shields_dashboard_now(
+            &state.app_pool,
+            actor,
+            course_id,
+        )
+        .await?,
+    ))
+}
+
+async fn recompute_course_shields(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path(course_id): Path<Uuid>,
+) -> ApiResult<Json<campuslingo_storage::shields::CourseShieldDashboard>> {
+    let actor = require_actor(&state, &headers).await?;
+    Ok(Json(
+        campuslingo_storage::shields::recompute_course_shields_now(
+            &state.app_pool,
+            actor,
+            course_id,
+        )
+        .await?,
+    ))
+}
+
+async fn report_node_content(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Path((course_id, node_id)): Path<(Uuid, Uuid)>,
+    Json(body): Json<campuslingo_storage::shields::NewNodeReport>,
+) -> ApiResult<(
+    StatusCode,
+    Json<campuslingo_storage::shields::NodeReportOutcome>,
+)> {
+    let actor = require_actor(&state, &headers).await?;
+    let outcome = campuslingo_storage::shields::submit_node_report(
+        &state.app_pool,
+        actor,
+        course_id,
+        node_id,
+        &body,
+    )
+    .await?;
+    Ok((StatusCode::CREATED, Json(outcome)))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/auth/register", post(register))
@@ -577,4 +655,133 @@ pub fn router() -> Router<AppState> {
         .route("/courses/{course_id}/jobs/{job_id}", get(get_job))
         .route("/courses/{course_id}/assets", post(assets::upload_asset))
         .route("/assets/{asset_id}", get(assets::download_asset))
+        .route(
+            "/courses/{course_id}/ingestion/runs/{run_id}",
+            get(ingestion_run),
+        )
+        .route(
+            "/courses/{course_id}/ingestion/crops/{crop_id}",
+            get(ingestion_crop),
+        )
+        .route("/courses/{course_id}/shields", get(get_course_shields))
+        .route(
+            "/courses/{course_id}/shields/recompute",
+            post(recompute_course_shields),
+        )
+        .route("/courses/{course_id}/fortress", get(get_course_shields))
+        .route(
+            "/courses/{course_id}/nodes/{node_id}/report",
+            post(report_node_content),
+        )
+        .route("/duels/ws", get(crate::duels::duel_websocket))
+        .route(
+            "/courses/{course_id}/duels/matchmake",
+            post(crate::duels::matchmake_duel),
+        )
+        .route(
+            "/courses/{course_id}/duels/recover",
+            post(crate::duels::recover_duels_endpoint),
+        )
+        .route(
+            "/courses/{course_id}/duels/{match_id}",
+            get(crate::duels::get_duel_status),
+        )
+        .route(
+            "/courses/{course_id}/raids/opt-in",
+            post(crate::m6::set_raid_opt_in_route),
+        )
+        .route(
+            "/courses/{course_id}/raids/scanner",
+            get(crate::m6::scan_raids_route),
+        )
+        .route(
+            "/courses/{course_id}/raids/start",
+            post(crate::m6::start_raid_route),
+        )
+        .route(
+            "/courses/{course_id}/raids/{raid_id}/settle",
+            post(crate::m6::settle_raid_route),
+        )
+        .route(
+            "/courses/{course_id}/notifications",
+            get(crate::m6::list_notifications_route),
+        )
+        .route(
+            "/courses/{course_id}/leagues/{week_key}",
+            get(crate::m6::get_league_bracket_route),
+        )
+        .route(
+            "/courses/{course_id}/leagues/score",
+            post(crate::m6::upsert_league_score_route),
+        )
+        .route(
+            "/courses/{course_id}/leagues/rollover",
+            post(crate::m6::rollover_league_route),
+        )
+        .route(
+            "/courses/{course_id}/bosses",
+            get(crate::m6::list_bosses_route).post(crate::m6::create_boss_route),
+        )
+        .route(
+            "/courses/{course_id}/bosses/{boss_id}/lobbies",
+            post(crate::m6::create_or_join_boss_lobby_route),
+        )
+        .route(
+            "/courses/{course_id}/bosses/{boss_id}/strike",
+            post(crate::m6::strike_boss_route),
+        )
+        .route(
+            "/courses/{course_id}/bosses/{boss_id}/claim",
+            post(crate::m6::claim_boss_chest_route),
+        )
+        .route("/bosses/ws", get(crate::m6::boss_websocket))
+        .route(
+            "/courses/{course_id}/clans",
+            post(crate::m6::create_clan_route),
+        )
+        .route(
+            "/courses/{course_id}/clans/{clan_id}/join",
+            post(crate::m6::join_clan_route),
+        )
+        .route(
+            "/courses/{course_id}/clans/{clan_id}/wars",
+            post(crate::m6::start_clan_war_route),
+        )
+        .route(
+            "/courses/{course_id}/clans/{clan_id}/wars/{war_id}/contribute",
+            post(crate::m6::contribute_clan_war_route),
+        )
+        .route(
+            "/courses/{course_id}/clans/{clan_id}/wars/{war_id}",
+            get(crate::m6::get_clan_war_route),
+        )
+        .route(
+            "/courses/{course_id}/economy",
+            get(crate::m6::get_economy_route),
+        )
+        .route(
+            "/notifications/devices",
+            axum::routing::post(crate::m7::register_device_route),
+        )
+        .route(
+            "/notifications/preferences",
+            axum::routing::put(crate::m7::upsert_preferences_route),
+        )
+        .route("/notifications/outbox", get(crate::m7::list_outbox_route))
+        .route(
+            "/courses/{course_id}/notifications/shield-digest",
+            axum::routing::post(crate::m7::enqueue_shield_digest_route),
+        )
+        .route(
+            "/notifications/dispatch",
+            axum::routing::post(crate::m7::dispatch_notifications_route),
+        )
+        .route(
+            "/me/pseudonymize",
+            axum::routing::post(crate::m7::pseudonymize_me_route),
+        )
+        .route(
+            "/courses/{course_id}/retention/sweep",
+            axum::routing::post(crate::m7::retention_sweep_route),
+        )
 }

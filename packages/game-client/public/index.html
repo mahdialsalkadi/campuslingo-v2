@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>CampusLingo Strategy Shell</title>
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./icons/icon-192.svg" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./m4-shell.css" />
+  </head>
+  <body>
+    <main class="shell" id="app-shell">
+      <section id="m4-game-shell" class="m4-shell card" aria-label="3D Concept Fortress and Hologram Shell"></section>
+
+      <header class="card header-card">
+        <p class="eyebrow">M3 WASM + CLAUSE_CONCAT Slice</p>
+        <h1 id="bundle-title" dir="auto">Loading unit...</h1>
+        <p id="wasm-status" class="status-pill" data-testid="wasm-status">Initializing WASM...</p>
+      </header>
+
+      <section class="card sandbox-card" aria-label="Interactive simulation">
+        <div class="section-head">
+          <h2>Parameter Sandbox</h2>
+          <span id="target-badge" class="target-badge" data-testid="target-badge">Checking...</span>
+        </div>
+        <div id="sandbox-controls"></div>
+        <div id="target-readout" class="target-readout" data-testid="target-readout"></div>
+      </section>
+
+      <section class="card source-card" aria-label="Source provenance diagram">
+        <div class="section-head">
+          <h2>Source Region Hotspots</h2>
+          <span id="director-badge" class="director-badge" data-testid="director-badge">Cue: overview</span>
+        </div>
+        <div id="diagram-stage" class="diagram-stage"></div>
+        <blockquote id="source-quote" class="source-quote" dir="auto" data-testid="source-quote"></blockquote>
+      </section>
+
+      <section class="card audio-card" aria-label="Audio briefing player">
+        <div class="section-head">
+          <h2>Synchronized Briefing</h2>
+          <span id="codec-status" class="codec-status" data-testid="codec-status">Probing .opus...</span>
+        </div>
+        <div class="audio-controls">
+          <button type="button" id="audio-toggle" class="touch-btn" data-testid="audio-toggle">Play Briefing</button>
+          <button type="button" id="audio-next-clause" class="touch-btn" data-testid="audio-next">Next Clause</button>
+        </div>
+        <p id="subtitle-banner" class="subtitle-banner" dir="auto" data-testid="subtitle-banner">...</p>
+        <div id="clause-chips" class="clause-chips"></div>
+      </section>
+    </main>
+    <script type="module" src="./app.mjs"></script>
+    <script type="module" src="./shell.js"></script>
+    <script>
+      if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+    </script>
+  </body>
+</html>

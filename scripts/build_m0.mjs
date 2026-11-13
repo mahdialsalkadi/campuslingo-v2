@@ -12,6 +12,8 @@ run('cargo', ['build', '--release', '--workspace', '--locked']);
 run('cargo', ['build', '--release', '-p', 'campuslingo-domain', '--lib', '--target', 'wasm32-unknown-unknown', '--locked', '--config', 'profile.release.strip=false']);
 await mkdir(new URL('../packages/engine/generated/', import.meta.url), { recursive: true });
 run(bindingTool, ['target/wasm32-unknown-unknown/release/campuslingo_domain.wasm', '--target', 'web', '--out-dir', 'packages/engine/generated']);
+run('./node_modules/.bin/esbuild', ['packages/game-client/src/controller.ts', '--bundle', '--format=esm', '--platform=browser', '--outfile=packages/game-client/public/controller.js']);
+run('./node_modules/.bin/esbuild', ['packages/game-client/src/shell.ts', '--bundle', '--format=esm', '--platform=browser', '--minify', '--outfile=packages/game-client/public/shell.js']);
 run('target/release/export-contracts', []);
 run('node', ['scripts/generate_types.mjs']);
 run('node', ['scripts/generate_domain_vectors.mjs']);

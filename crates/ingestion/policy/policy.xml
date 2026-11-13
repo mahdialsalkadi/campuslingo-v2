@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Raster-only crop worker. PDF is decoded by contained Poppler, never an
+     implicit ImageMagick/Ghostscript delegate. Additional cgroup/RLIMIT bounds
+     apply to the entire helper tree. -->
+<policymap>
+  <policy domain="resource" name="memory" value="128MiB"/>
+  <policy domain="resource" name="map" value="256MiB"/>
+  <policy domain="resource" name="disk" value="64MiB"/>
+  <policy domain="resource" name="width" value="24KP"/>
+  <policy domain="resource" name="height" value="24KP"/>
+  <policy domain="resource" name="area" value="24MP"/>
+  <!-- ImageMagick needs temporary image clones even for a single PNG crop. -->
+  <policy domain="resource" name="list-length" value="4"/>
+  <policy domain="resource" name="thread" value="2"/>
+  <policy domain="resource" name="time" value="45"/>
+  <policy domain="delegate" rights="none" pattern="*"/>
+  <policy domain="filter" rights="none" pattern="*"/>
+  <policy domain="path" rights="none" pattern="@*"/>
+  <policy domain="coder" rights="none" pattern="*"/>
+  <policy domain="coder" rights="read" pattern="PNG"/>
+  <policy domain="coder" rights="write" pattern="WEBP"/>
+</policymap>

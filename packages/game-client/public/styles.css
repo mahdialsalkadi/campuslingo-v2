@@ -1,0 +1,254 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --bg: #f4f7fb;
+  --card: #ffffff;
+  --ink: #111827;
+  --muted: #4b5563;
+  --accent: #0f766e;
+  --target: #10b981;
+  --border: #cbd5e1;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.shell {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  width: 100%;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.status-pill, .target-badge, .director-badge, .codec-status {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.target-badge[data-solved="true"] {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.param-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.param-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.touch-btn {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid #0f766e;
+  background: #ecfeff;
+  color: #134e4a;
+  cursor: pointer;
+}
+
+.slider-wrap {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+}
+
+.target-band-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 14px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.target-zone-highlight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: rgba(16, 185, 129, 0.55);
+  border: 1px solid #047857;
+  border-radius: 999px;
+}
+
+input[type="range"].discrete-slider {
+  position: relative;
+  width: 100%;
+  min-height: 48px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="range"].discrete-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #0f766e;
+  border: 3px solid #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
+input[type="range"].discrete-slider::-moz-range-thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: #0f766e;
+  border: 3px solid #ffffff;
+}
+
+.target-readout {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.diagram-stage {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  background: #f8fafc;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.hotspot-btn {
+  position: absolute;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 2px solid #0369a1;
+  background: rgba(224, 242, 254, 0.92);
+  color: #0c4a6e;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hotspot-btn[aria-pressed="true"] {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.source-quote {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-inline-start: 3px solid var(--accent);
+  background: #f1f5f9;
+  font-size: 14px;
+}
+
+.audio-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.subtitle-banner {
+  margin: 0 0 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.clause-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Negative test fixture mode enabled ONLY via ?compact-test=1 query flag */
+body.compact-test .touch-btn,
+body.compact-test .hotspot-btn,
+body.compact-test input[type="range"].discrete-slider {
+  min-width: 24px;
+  min-height: 24px;
+  height: 24px;
+  padding: 2px;
+  font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

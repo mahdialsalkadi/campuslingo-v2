@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="96" fill="#0f172a"/>
+  <polygon points="256,64 416,154 416,336 256,432 96,336 96,154" fill="#1e293b" stroke="#38bdf8" stroke-width="14"/>
+  <polygon points="256,128 358,186 358,304 256,364 154,304 154,186" fill="#0e7490" stroke="#2dd4bf" stroke-width="10"/>
+  <text x="256" y="282" text-anchor="middle" font-family="sans-serif" font-size="102" font-weight="700" fill="#f8fafc">CL</text>
+</svg>

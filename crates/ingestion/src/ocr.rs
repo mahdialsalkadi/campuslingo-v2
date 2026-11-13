@@ -5,10 +5,8 @@
 //! prompt provenance so a later content version can be reproduced or rejected.
 
 use std::{
-    fs::File,
-    net::TcpListener,
     path::{Path, PathBuf},
-    process::Stdio,
+    sync::Arc,
     time::Duration,
 };
 
@@ -16,21 +14,32 @@ use base64::Engine;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use thiserror::Error;
-use tokio::{
-    process::{Child, Command},
-    time::{Instant, sleep},
-};
+use tokio::time::Instant;
 
-use crate::{ModelLease, RESERVED_HOST_BYTES, host_memory, process_peak_rss, process_rss};
+pub use crate::llama::{
+    MAX_MODEL_RSS_BYTES, MODEL_START_TIMEOUT, ModelRelease, detect_vulkan_device,
+};
+use crate::{
+    llama::{
+        LlamaError, LlamaLaunchSpec, ManagedLlamaLease, ManagedLlamaRuntime, ManagedLlamaServer,
+        build_local_http_client, check_model_memory, validate_loopback_endpoint,
+    },
+    process_peak_rss,
+};
 
 pub const OCR_PROMPT_VERSION: &str = "paddleocr-vl-ocr-v1";
 pub const OCR_PROMPT: &str = "OCR:";
 pub const MAX_OCR_IMAGE_BYTES: usize = 16 * 1024 * 1024;
-pub const MAX_MODEL_RSS_BYTES: u64 = 1024 * 1024 * 1024;
-pub const MODEL_START_TIMEOUT: Duration = Duration::from_secs(120);
+/// llama-server retains allocator/vision memory across requests. A bounded
+/// restart interval keeps a long deck under the same RSS budget without
+/// changing page extraction. Counted in OCR requests, not pages.
+pub const OCR_RESTART_AFTER_REQUESTS: usize = 16;
+const OCR_VULKAN_PARALLEL_SLOTS: usize = 2;
 
 #[derive(Debug, Error)]
 pub enum OcrError {
+    #[error("OCR inference requires a literal loopback HTTP(S) endpoint")]
+    NonLocalEndpoint,
     #[error("the OCR model is not configured")]
     NotConfigured,
     #[error("the OCR model could not be started")]
@@ -51,6 +60,26 @@ pub enum OcrError {
     Empty,
     #[error("the OCR request timed out")]
     Timeout,
+    #[error("the OCR model tree or its memory release could not be verified")]
+    Release,
+}
+
+impl From<LlamaError> for OcrError {
+    fn from(error: LlamaError) -> Self {
+        match error {
+            LlamaError::NonLocalEndpoint => Self::NonLocalEndpoint,
+            LlamaError::NotConfigured => Self::NotConfigured,
+            LlamaError::ModelStart => Self::ModelStart,
+            LlamaError::ModelTimeout => Self::ModelTimeout,
+            LlamaError::Memory => Self::Memory,
+            LlamaError::Transport => Self::Transport,
+            LlamaError::Http(code) => Self::Http(code),
+            LlamaError::InvalidResponse => Self::InvalidResponse,
+            LlamaError::Empty => Self::Empty,
+            LlamaError::Timeout => Self::Timeout,
+            LlamaError::Release => Self::Release,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -65,7 +94,7 @@ pub struct OcrResult {
     pub model_peak_rss_bytes: Option<u64>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct OcrClientConfig {
     pub endpoint: String,
     pub model: String,
@@ -75,6 +104,8 @@ pub struct OcrClientConfig {
     pub max_image_bytes: usize,
     pub max_model_rss_bytes: u64,
     pub model_pid: Option<u32>,
+    authorization: Option<reqwest::header::HeaderValue>,
+    runtime: Option<Arc<ManagedOcrRuntime>>,
 }
 
 impl OcrClientConfig {
@@ -88,24 +119,67 @@ impl OcrClientConfig {
             max_image_bytes: MAX_OCR_IMAGE_BYTES,
             max_model_rss_bytes: MAX_MODEL_RSS_BYTES,
             model_pid: None,
+            authorization: None,
+            runtime: None,
         }
+    }
+
+    fn managed(runtime: Arc<ManagedOcrRuntime>, model: impl Into<String>) -> Self {
+        // The runtime supplies the live endpoint and bearer token per request;
+        // this literal loopback placeholder only satisfies construction-time
+        // endpoint validation.
+        let mut config = Self::external("http://127.0.0.1/", model);
+        config.runtime = Some(runtime);
+        config
     }
 }
 
-#[derive(Clone, Debug)]
+impl std::fmt::Debug for OcrClientConfig {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("OcrClientConfig")
+            .field("endpoint", &self.endpoint)
+            .field("model", &self.model)
+            .field("prompt_version", &self.prompt_version)
+            .field("timeout", &self.timeout)
+            .field("max_image_bytes", &self.max_image_bytes)
+            .field("max_model_rss_bytes", &self.max_model_rss_bytes)
+            .field("model_pid", &self.model_pid)
+            .field(
+                "authorization",
+                &self.authorization.as_ref().map(|_| "[REDACTED]"),
+            )
+            .field("managed_runtime", &self.runtime.is_some())
+            .finish()
+    }
+}
+
+#[derive(Clone)]
 pub struct OcrClient {
     client: reqwest::Client,
     config: OcrClientConfig,
 }
 
+impl std::fmt::Debug for OcrClient {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter
+            .debug_struct("OcrClient")
+            .field("config", &self.config)
+            .finish()
+    }
+}
+
+struct OcrConnection {
+    endpoint: String,
+    authorization: Option<reqwest::header::HeaderValue>,
+    model_pid: Option<u32>,
+    _lease: Option<ManagedLlamaLease>,
+}
+
 impl OcrClient {
     pub fn new(config: OcrClientConfig) -> Result<Self, OcrError> {
-        let client = reqwest::Client::builder()
-            .connect_timeout(Duration::from_secs(3))
-            .timeout(config.timeout)
-            .no_proxy()
-            .build()
-            .map_err(|_| OcrError::Transport)?;
+        let _ = validate_loopback_endpoint(&config.endpoint)?;
+        let client = build_local_http_client(config.timeout)?;
         Ok(Self { client, config })
     }
 
@@ -113,25 +187,28 @@ impl OcrClient {
         &self.config
     }
 
+    async fn connection(&self) -> Result<OcrConnection, OcrError> {
+        if let Some(runtime) = &self.config.runtime {
+            return runtime.connection().await;
+        }
+        Ok(OcrConnection {
+            endpoint: self.config.endpoint.clone(),
+            authorization: self.config.authorization.clone(),
+            model_pid: self.config.model_pid,
+            _lease: None,
+        })
+    }
+
     /// Enforce the model budget before and after each request. A page image
     /// request is serialized by the pipeline, so RSS cannot be multiplied by
     /// concurrent OCR prompts.
-    pub fn check_memory(&self) -> Result<(), OcrError> {
-        if let Some(pid) = self.config.model_pid {
-            let rss = process_rss(pid).map_err(|_| OcrError::Memory)?;
-            if rss > self.config.max_model_rss_bytes {
-                return Err(OcrError::Memory);
-            }
-        }
-        let available = host_memory().map_err(|_| OcrError::Memory)?.available_bytes;
-        if available < RESERVED_HOST_BYTES {
-            return Err(OcrError::Memory);
-        }
-        Ok(())
+    fn check_memory(&self, model_pid: Option<u32>) -> Result<(), OcrError> {
+        check_model_memory(model_pid, self.config.max_model_rss_bytes).map_err(OcrError::from)
     }
 
     pub async fn recognize_png(&self, path: &Path) -> Result<OcrResult, OcrError> {
-        self.check_memory()?;
+        let connection = self.connection().await?;
+        self.check_memory(connection.model_pid)?;
         let metadata = tokio::fs::metadata(path)
             .await
             .map_err(|_| OcrError::Transport)?;
@@ -156,22 +233,23 @@ impl OcrClient {
             }]
         });
         let started = Instant::now();
-        let response = self
+        let mut request = self
             .client
             .post(format!(
                 "{}/v1/chat/completions",
-                self.config.endpoint.trim_end_matches('/')
+                connection.endpoint.trim_end_matches('/')
             ))
-            .json(&body)
-            .send()
-            .await
-            .map_err(|error| {
-                if error.is_timeout() {
-                    OcrError::Timeout
-                } else {
-                    OcrError::Transport
-                }
-            })?;
+            .json(&body);
+        if let Some(authorization) = &connection.authorization {
+            request = request.header(reqwest::header::AUTHORIZATION, authorization.clone());
+        }
+        let response = request.send().await.map_err(|error| {
+            if error.is_timeout() {
+                OcrError::Timeout
+            } else {
+                OcrError::Transport
+            }
+        })?;
         let status = response.status();
         if !status.is_success() {
             return Err(OcrError::Http(status.as_u16()));
@@ -187,7 +265,7 @@ impl OcrClient {
         if text.is_empty() {
             return Err(OcrError::Empty);
         }
-        self.check_memory()?;
+        self.check_memory(connection.model_pid)?;
         Ok(OcrResult {
             text,
             model: self.config.model.clone(),
@@ -195,8 +273,7 @@ impl OcrClient {
             duration_ms: started.elapsed().as_millis() as u64,
             prompt_tokens: value["usage"]["prompt_tokens"].as_u64().unwrap_or(0),
             completion_tokens: value["usage"]["completion_tokens"].as_u64().unwrap_or(0),
-            model_peak_rss_bytes: self
-                .config
+            model_peak_rss_bytes: connection
                 .model_pid
                 .and_then(|pid| process_peak_rss(pid).ok()),
         })
@@ -246,134 +323,114 @@ pub struct ManagedOcrConfig {
     pub lease_path: PathBuf,
     pub threads: u32,
     pub context_size: u32,
+    pub gpu_device: Option<String>,
+}
+
+impl From<&ManagedOcrConfig> for LlamaLaunchSpec {
+    fn from(config: &ManagedOcrConfig) -> Self {
+        Self {
+            role: "ocr",
+            binary: config.binary.clone(),
+            model: config.model.clone(),
+            mmproj: Some(config.mmproj.clone()),
+            work_dir: config.work_dir.clone(),
+            lease_path: config.lease_path.clone(),
+            threads: config.threads,
+            context_size: config.context_size.clamp(1024, 8192),
+            parallel_slots: if config.gpu_device.is_some() {
+                OCR_VULKAN_PARALLEL_SLOTS as u32
+            } else {
+                1
+            },
+            gpu_device: config.gpu_device.clone(),
+            budget_bytes: MAX_MODEL_RSS_BYTES,
+            restart_after_requests: Some(OCR_RESTART_AFTER_REQUESTS),
+            extra_args: Vec::new(),
+        }
+    }
 }
 
 pub struct ManagedOcrServer {
-    child: Child,
-    endpoint: String,
+    inner: ManagedLlamaServer,
     pub model_pid: u32,
-    _lease: ModelLease,
-    log_path: PathBuf,
 }
 
 impl ManagedOcrServer {
     pub async fn start(config: &ManagedOcrConfig) -> Result<Self, OcrError> {
-        let model_bytes = std::fs::metadata(&config.model)
-            .map_err(|_| OcrError::ModelStart)?
-            .len();
-        let mmproj_bytes = std::fs::metadata(&config.mmproj)
-            .map_err(|_| OcrError::ModelStart)?
-            .len();
-        tokio::fs::create_dir_all(&config.work_dir)
-            .await
-            .map_err(|_| OcrError::ModelStart)?;
-        let reserve = RESERVED_HOST_BYTES
-            .saturating_add(model_bytes)
-            .saturating_add(mmproj_bytes)
-            .saturating_add(256 * 1024 * 1024);
-        if host_memory().map_err(|_| OcrError::Memory)?.available_bytes < reserve {
-            return Err(OcrError::Memory);
-        }
-        let lease =
-            ModelLease::acquire(&config.lease_path, reserve).map_err(|_| OcrError::ModelStart)?;
-        let listener = TcpListener::bind("127.0.0.1:0").map_err(|_| OcrError::ModelStart)?;
-        let port = listener
-            .local_addr()
-            .map_err(|_| OcrError::ModelStart)?
-            .port();
-        drop(listener);
-        let endpoint = format!("http://127.0.0.1:{port}");
-        let log_path = config.work_dir.join("llama-ocr.log");
-        let log = File::create(&log_path).map_err(|_| OcrError::ModelStart)?;
-        let threads = config.threads.clamp(1, 16).to_string();
-        let context = config.context_size.clamp(1024, 8192).to_string();
-        let mut command = Command::new(&config.binary);
-        command
-            .arg("--model")
-            .arg(&config.model)
-            .arg("--mmproj")
-            .arg(&config.mmproj)
-            .arg("--host")
-            .arg("127.0.0.1")
-            .arg("--port")
-            .arg(port.to_string())
-            .arg("--ctx-size")
-            .arg(&context)
-            .arg("--parallel")
-            .arg("1")
-            .arg("--threads")
-            .arg(&threads)
-            .arg("--threads-batch")
-            .arg(&threads)
-            .arg("--gpu-layers")
-            .arg("0")
-            .arg("--no-warmup")
-            .arg("--no-webui")
-            .env("OMP_NUM_THREADS", &threads)
-            .stdin(Stdio::null())
-            .stdout(log)
-            .stderr(Stdio::null())
-            .kill_on_drop(true);
-        let mut child = command.spawn().map_err(|_| OcrError::ModelStart)?;
-        let model_pid = child.id().ok_or(OcrError::ModelStart)?;
-        let client = reqwest::Client::builder()
-            .connect_timeout(Duration::from_secs(2))
-            .timeout(Duration::from_secs(5))
-            .no_proxy()
-            .build()
-            .map_err(|_| OcrError::ModelStart)?;
-        let started = Instant::now();
-        loop {
-            if child
-                .try_wait()
-                .map_err(|_| OcrError::ModelStart)?
-                .is_some()
-            {
-                return Err(OcrError::ModelStart);
-            }
-            if started.elapsed() > MODEL_START_TIMEOUT {
-                return Err(OcrError::ModelTimeout);
-            }
-            if let Ok(response) = client.get(format!("{endpoint}/health")).send().await
-                && response.status().is_success()
-            {
-                break;
-            }
-            sleep(Duration::from_millis(250)).await;
-        }
-        Ok(Self {
-            child,
-            endpoint,
-            model_pid,
-            _lease: lease,
-            log_path,
-        })
+        let inner = ManagedLlamaServer::start(&LlamaLaunchSpec::from(config)).await?;
+        let model_pid = inner.model_pid;
+        Ok(Self { inner, model_pid })
     }
 
     pub fn endpoint(&self) -> &str {
-        &self.endpoint
+        self.inner.endpoint()
     }
 
     pub fn log_path(&self) -> &Path {
-        &self.log_path
+        self.inner.log_path()
     }
 
     pub fn client_config(&self, model: String) -> OcrClientConfig {
-        let mut config = OcrClientConfig::external(self.endpoint.clone(), model);
+        let mut config = OcrClientConfig::external(self.inner.endpoint(), model);
         config.model_pid = Some(self.model_pid);
+        config.authorization = Some(self.inner.authorization().clone());
         config
     }
 
-    /// Stop the model and wait briefly for it to release memory.
-    pub async fn stop(mut self) {
-        let _ = self.child.start_kill();
-        let _ = tokio::time::timeout(Duration::from_secs(10), self.child.wait()).await;
+    /// Kill/reap the complete tree and remove its cgroup before releasing the
+    /// model lease. Never infer resource release from a falling RSS sample.
+    pub async fn stop(self) -> Result<ModelRelease, OcrError> {
+        self.inner.stop().await.map_err(OcrError::from)
+    }
+}
+
+pub struct ManagedOcrRuntime {
+    inner: Arc<ManagedLlamaRuntime>,
+}
+
+impl ManagedOcrRuntime {
+    pub async fn start(config: ManagedOcrConfig) -> Result<Arc<Self>, OcrError> {
+        let inner = ManagedLlamaRuntime::start(LlamaLaunchSpec::from(&config)).await?;
+        Ok(Arc::new(Self { inner }))
+    }
+
+    pub fn client(self: &Arc<Self>, model: String) -> Result<OcrClient, OcrError> {
+        OcrClient::new(OcrClientConfig::managed(self.clone(), model))
+    }
+
+    pub fn restarts(&self) -> usize {
+        self.inner.restarts()
+    }
+
+    async fn connection(&self) -> Result<OcrConnection, OcrError> {
+        let lease = self.inner.acquire_request().await?;
+        Ok(OcrConnection {
+            endpoint: lease.endpoint.clone(),
+            authorization: Some(lease.authorization.clone()),
+            model_pid: Some(lease.model_pid),
+            _lease: Some(lease),
+        })
+    }
+
+    /// Stop the currently owned model and verify its tree/cgroup release.
+    pub async fn stop(&self) -> Result<ModelRelease, OcrError> {
+        self.inner.stop().await.map_err(OcrError::from)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn managed_authorization_is_redacted_from_debug_output() {
+        let mut config = OcrClientConfig::external("http://127.0.0.1:8080", "local");
+        let mut authorization =
+            reqwest::header::HeaderValue::from_static("Bearer synthetic-secret");
+        authorization.set_sensitive(true);
+        config.authorization = Some(authorization);
+        assert!(!format!("{config:?}").contains("synthetic-secret"));
+    }
 
     #[test]
     fn removes_wrappers_but_keeps_critical_text() {
@@ -383,5 +440,24 @@ mod tests {
         assert!(text.contains("42%, not 24%"));
         assert!(!text.contains("```"));
         assert!(!text.contains("\\("));
+    }
+
+    #[test]
+    fn private_derivatives_cannot_be_sent_to_nonlocal_ocr_endpoints() {
+        for endpoint in [
+            "https://example.com",
+            "http://localhost:8080",
+            "http://192.168.1.2:8080",
+            "http://127.0.0.1:8080/path",
+            "http://user:secret@127.0.0.1:8080",
+        ] {
+            assert!(matches!(
+                OcrClient::new(OcrClientConfig::external(endpoint, "local")),
+                Err(OcrError::NonLocalEndpoint)
+            ));
+        }
+        for endpoint in ["http://127.0.0.1:8080", "http://[::1]:8080"] {
+            assert!(OcrClient::new(OcrClientConfig::external(endpoint, "local")).is_ok());
+        }
     }
 }

@@ -6,6 +6,10 @@
 //! arithmetic is used here.
 
 pub const WINDOW_TABLE_VERSION: u32 = 1;
+pub const MIN_STAGE3_BASE_WINDOW_MS: u32 = 8_000;
+pub const MAX_STAGE3_BASE_WINDOW_MS: u32 = 15_000;
+pub const AXIOM_PACK_MIN_CARDS: usize = 2;
+pub const AXIOM_PACK_MAX_CARDS: usize = 4;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Accommodation {
@@ -61,6 +65,14 @@ pub enum WindowError {
     UnknownPair,
     UnsupportedAccommodation,
     NotPrimaryLiveDuelForm,
+    NotPrimaryCard,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AxiomPackError {
+    InvalidCount,
+    EmptyCardId,
+    DuplicateCardId,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -181,14 +193,118 @@ pub fn w_live_duel_cut_ms(
     den: u32,
 ) -> Result<u32, WindowError> {
     let accommodation = Accommodation::from_ratio(num, den)?;
+    let base_ms = w_base_for_live_duel_ms(archetype, modifier)?;
+    Ok(cut_ms(base_ms, accommodation))
+}
+
+/// Base millisecond window for a primary live-duel card (always <= 10_000 ms;
+/// pods fall back to their 6_000 ms live-duel `SPEED_BLITZ` variant).
+pub fn w_base_for_live_duel_ms(archetype: &str, modifier: &str) -> Result<u32, WindowError> {
     let row = entry(archetype, modifier).ok_or(WindowError::UnknownPair)?;
-    let base_ms = if row.live_duel_eligible {
-        row.w_base_ms
+    if row.live_duel_eligible {
+        Ok(row.w_base_ms)
     } else {
         row.live_duel_variant_base_ms
-            .ok_or(WindowError::NotPrimaryLiveDuelForm)?
-    };
+            .ok_or(WindowError::NotPrimaryLiveDuelForm)
+    }
+}
+
+/// Personal effective mastery window `W_personal_eff = W_base * M_accommodation`.
+pub fn w_personal_eff_ms(base_ms: u32, num: u32, den: u32) -> Result<u32, WindowError> {
+    let accommodation = Accommodation::from_ratio(num, den)?;
+    Ok(base_ms * accommodation.num() / accommodation.den())
+}
+
+/// Personal cutoff `W_cut = W_eff + min(2000, 0.20 * W_eff)` from an already
+/// resolved base window in milliseconds.
+pub fn w_personal_cut_from_base_ms(base_ms: u32, num: u32, den: u32) -> Result<u32, WindowError> {
+    let accommodation = Accommodation::from_ratio(num, den)?;
     Ok(cut_ms(base_ms, accommodation))
+}
+
+/// Un-truncated 4.0s `QUICK_BLITZ_CHAIN` bonus slot personal effective window (`S-11`).
+pub fn w_quick_blitz_chain_eff_ms(num: u32, den: u32) -> Result<u32, WindowError> {
+    let row = entry("AXIOM", "QUICK_BLITZ_CHAIN").ok_or(WindowError::UnknownPair)?;
+    w_personal_eff_ms(row.w_base_ms, num, den)
+}
+
+/// Un-truncated 4.0s `QUICK_BLITZ_CHAIN` bonus slot cutoff (`W_eff + min(2000, 0.20 * W_eff)`).
+pub fn w_quick_blitz_chain_cut_ms(num: u32, den: u32) -> Result<u32, WindowError> {
+    let row = entry("AXIOM", "QUICK_BLITZ_CHAIN").ok_or(WindowError::UnknownPair)?;
+    let accommodation = Accommodation::from_ratio(num, den)?;
+    Ok(cut_ms(row.w_base_ms, accommodation))
+}
+
+/// Dynamic tail Sudden-Death cutoff (`SPEED_BLITZ` 6000ms scaled by accommodation and
+/// bounded by `remaining_ms`).
+pub fn w_sudden_death_cut_ms(num: u32, den: u32, remaining_ms: u32) -> Result<u32, WindowError> {
+    let accommodation = Accommodation::from_ratio(num, den)?;
+    let blitz_cut = cut_ms(6_000, accommodation);
+    Ok(blitz_cut.min(remaining_ms.max(1)))
+}
+
+/// Returns `(W_round_cut_ms, W_cut_at_M1_ms)` per `D-02-A` and `DEC-007`:
+/// `W_round_cut = max(W_cut(player_a), W_cut(player_b))`,
+/// `W_cut_at_M1 = max(W_cut(base_a, 1/1), W_cut(base_b, 1/1))`.
+pub fn w_round_cut_and_m1_ms(
+    base_a_ms: u32,
+    num_a: u32,
+    den_a: u32,
+    base_b_ms: u32,
+    num_b: u32,
+    den_b: u32,
+) -> Result<(u32, u32), WindowError> {
+    let cut_a = w_personal_cut_from_base_ms(base_a_ms, num_a, den_a)?;
+    let cut_b = w_personal_cut_from_base_ms(base_b_ms, num_b, den_b)?;
+    let cut_a_m1 = w_personal_cut_from_base_ms(base_a_ms, 1, 1)?;
+    let cut_b_m1 = w_personal_cut_from_base_ms(base_b_ms, 1, 1)?;
+    Ok((cut_a.max(cut_b), cut_a_m1.max(cut_b_m1)))
+}
+
+/// Deterministic provisional energy cost in `1..=6` (`S-20`) derived from the
+/// frozen base window table for primary cards. Final release balance remains open
+/// in `balance-v1.md`.
+pub fn card_elixir_cost(archetype: &str, modifier: &str) -> Result<u8, WindowError> {
+    let row = entry(archetype, modifier).ok_or(WindowError::UnknownPair)?;
+    if row.kind != WindowKind::BasePair {
+        return Err(WindowError::NotPrimaryCard);
+    }
+    let cost = match row.w_base_ms {
+        ..=6_000 => 1,
+        6_001..=8_000 => 2,
+        8_001..=9_000 => 3,
+        9_001..=10_000 => 4,
+        10_001..=11_000 => 5,
+        _ => 6,
+    };
+    Ok(cost)
+}
+
+/// DEC-002 / S-11: Stage-3 card compaction requires an 8000..=15000 ms primary
+/// base window. Sub-8s frozen forms (`SPEED_BLITZ` 6s, `QUICK_BLITZ_CHAIN` 4s)
+/// are ineligible rather than stretched silently.
+pub fn is_stage3_drill_eligible(archetype: &str, modifier: &str) -> Result<bool, WindowError> {
+    let row = entry(archetype, modifier).ok_or(WindowError::UnknownPair)?;
+    Ok(row.kind == WindowKind::BasePair
+        && (MIN_STAGE3_BASE_WINDOW_MS..=MAX_STAGE3_BASE_WINDOW_MS).contains(&row.w_base_ms))
+}
+
+/// DEC-003: `AXIOM_PACK` compacts 2..=4 fast drills into one turn while
+/// preserving distinct `card_id`s so per-card FSRS-6 state stays independent.
+pub fn validate_axiom_pack_card_ids(card_ids: &[&str]) -> Result<(), AxiomPackError> {
+    if !(AXIOM_PACK_MIN_CARDS..=AXIOM_PACK_MAX_CARDS).contains(&card_ids.len()) {
+        return Err(AxiomPackError::InvalidCount);
+    }
+    let mut seen = std::collections::BTreeSet::new();
+    for &card_id in card_ids {
+        if card_id.trim().is_empty() {
+            return Err(AxiomPackError::EmptyCardId);
+        }
+        if !seen.insert(card_id) {
+            return Err(AxiomPackError::DuplicateCardId);
+        }
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -242,6 +358,67 @@ mod tests {
         assert_eq!(
             w_live_duel_cut_ms("AXIOM", "QUICK_BLITZ_CHAIN", 1, 1),
             Err(WindowError::NotPrimaryLiveDuelForm)
+        );
+    }
+
+    #[test]
+    fn card_elixir_cost_stage3_eligibility_and_axiom_pack_enforce_invariants() {
+        let mut base_pairs = 0;
+        for row in window_table() {
+            match row.kind {
+                WindowKind::BasePair => {
+                    base_pairs += 1;
+                    let cost = card_elixir_cost(row.archetype, row.modifier).unwrap();
+                    assert!((1..=6).contains(&cost));
+                    let eligible = is_stage3_drill_eligible(row.archetype, row.modifier).unwrap();
+                    if row.modifier == "SPEED_BLITZ" {
+                        assert!(!eligible);
+                    } else {
+                        assert!(eligible);
+                    }
+                }
+                WindowKind::ChainSubMode => {
+                    assert_eq!(
+                        card_elixir_cost(row.archetype, row.modifier),
+                        Err(WindowError::NotPrimaryCard)
+                    );
+                    assert_eq!(
+                        is_stage3_drill_eligible(row.archetype, row.modifier),
+                        Ok(false)
+                    );
+                }
+            }
+        }
+        assert_eq!(base_pairs, 18);
+        assert_eq!(
+            card_elixir_cost("UNKNOWN", "NOPE"),
+            Err(WindowError::UnknownPair)
+        );
+        assert_eq!(
+            is_stage3_drill_eligible("UNKNOWN", "NOPE"),
+            Err(WindowError::UnknownPair)
+        );
+
+        assert_eq!(validate_axiom_pack_card_ids(&["c1", "c2"]), Ok(()));
+        assert_eq!(
+            validate_axiom_pack_card_ids(&["c1", "c2", "c3", "c4"]),
+            Ok(())
+        );
+        assert_eq!(
+            validate_axiom_pack_card_ids(&["c1"]),
+            Err(AxiomPackError::InvalidCount)
+        );
+        assert_eq!(
+            validate_axiom_pack_card_ids(&["c1", "c2", "c3", "c4", "c5"]),
+            Err(AxiomPackError::InvalidCount)
+        );
+        assert_eq!(
+            validate_axiom_pack_card_ids(&["c1", " "]),
+            Err(AxiomPackError::EmptyCardId)
+        );
+        assert_eq!(
+            validate_axiom_pack_card_ids(&["c1", "c1"]),
+            Err(AxiomPackError::DuplicateCardId)
         );
     }
 }

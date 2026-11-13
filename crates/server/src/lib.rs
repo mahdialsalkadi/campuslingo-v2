@@ -1,7 +1,10 @@
 pub mod assets;
 pub mod auth;
 pub mod config;
+pub mod duels;
 pub mod error;
+pub mod m6;
+pub mod m7;
 pub mod recovery;
 pub mod routes;
 
@@ -12,7 +15,7 @@ use axum::{
     Json, Router,
     body::Body,
     extract::{DefaultBodyLimit, State},
-    http::{Request, StatusCode, header},
+    http::{HeaderValue, Request, StatusCode, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
     routing::get,
@@ -24,7 +27,7 @@ use tokio::{
     time::{Duration, timeout},
 };
 
-use auth::AuthLimiter;
+use auth::{ActorRateLimiter, AuthLimiter};
 use config::Settings;
 
 #[derive(Clone)]
@@ -32,10 +35,14 @@ pub struct AppState {
     pub auth_pool: PgPool,
     pub app_pool: PgPool,
     pub grader_pool: PgPool,
+    pub recovery_pool: Option<PgPool>,
     pub settings: Arc<Settings>,
     pub limiter: Arc<AuthLimiter>,
+    pub actor_limiter: Arc<ActorRateLimiter>,
     pub hashing: Arc<Semaphore>,
     pub dummy_hash: Arc<str>,
+    pub duels: Arc<duels::DuelHub>,
+    pub bosses: Arc<m6::BossLobbyHub>,
 }
 
 impl AppState {
@@ -44,12 +51,17 @@ impl AppState {
             PgPoolOptions::new()
                 .max_connections(maximum)
                 .min_connections(0)
-                .acquire_timeout(Duration::from_secs(2))
+                .acquire_timeout(Duration::from_secs(5))
                 .connect_lazy(url)
         };
-        let auth_pool = build(&Settings::auth_database_url()?, 4)?;
-        let app_pool = build(&Settings::app_database_url()?, 8)?;
-        let grader_pool = build(&Settings::grader_database_url()?, 4)?;
+        let auth_pool = build(&Settings::auth_database_url()?, 8)?;
+        let app_pool = build(&Settings::app_database_url()?, 16)?;
+        let grader_pool = build(&Settings::grader_database_url()?, 8)?;
+        let recovery_pool = std::env::var("CAMPUSLINGO_RECOVERY_DATABASE_URL")
+            .ok()
+            .filter(|v| !v.is_empty())
+            .map(|url| build(&url, 2))
+            .transpose()?;
         let hashing = Arc::new(Semaphore::new(1));
         let dummy_hash = auth::dummy_hash(hashing.clone()).await?.into();
         tokio::fs::create_dir_all(&settings.asset_dir).await?;
@@ -62,10 +74,14 @@ impl AppState {
             auth_pool,
             app_pool,
             grader_pool,
+            recovery_pool,
             settings: Arc::new(settings),
             limiter: Arc::new(AuthLimiter::new()),
+            actor_limiter: Arc::new(ActorRateLimiter::from_env()),
             hashing,
             dummy_hash,
+            duels: Arc::new(duels::DuelHub::new()),
+            bosses: Arc::new(m6::BossLobbyHub::new()),
         })
     }
 }
@@ -77,8 +93,32 @@ pub fn build_router(state: AppState) -> Router {
         .nest("/v1", routes::router())
         .layer(DefaultBodyLimit::max(64 * 1024))
         .layer(middleware::from_fn_with_state(state.clone(), same_origin))
+        .layer(middleware::from_fn(security_headers))
         .layer(middleware::from_fn(log_request))
         .with_state(state)
+}
+
+async fn security_headers(request: Request<Body>, next: Next) -> Response {
+    let is_api = request.uri().path().starts_with("/v1");
+    let mut response = next.run(request).await;
+    let headers = response.headers_mut();
+    headers.insert(
+        header::X_CONTENT_TYPE_OPTIONS,
+        HeaderValue::from_static("nosniff"),
+    );
+    headers.insert(header::X_FRAME_OPTIONS, HeaderValue::from_static("DENY"));
+    headers.insert(
+        header::HeaderName::from_static("referrer-policy"),
+        HeaderValue::from_static("no-referrer"),
+    );
+    headers.insert(
+        header::HeaderName::from_static("permissions-policy"),
+        HeaderValue::from_static("geolocation=(), microphone=(), camera=()"),
+    );
+    if is_api && !headers.contains_key(header::CACHE_CONTROL) {
+        headers.insert(header::CACHE_CONTROL, HeaderValue::from_static("no-store"));
+    }
+    response
 }
 
 /// Structured request logs intentionally exclude cookies, bodies, emails, and
@@ -105,6 +145,7 @@ async fn health() -> Json<serde_json::Value> {
     Json(json!({
         "status": "alive",
         "stage": "M1",
+        "milestone": "M7",
         "algorithm": "FSRS-6",
         "schema_version": campuslingo_domain::SCHEMA_VERSION
     }))

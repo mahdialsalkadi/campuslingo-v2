@@ -6,7 +6,7 @@
 
 import { spawnSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { mkdir, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, stat, writeFile } from 'node:fs/promises';
 import net from 'node:net';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,7 +15,9 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pgBin =
   process.env.CAMPUSLINGO_PG_BIN ??
   '/home/mahdi/campus-lingo/services/core-ai/.venv/lib/python3.11/site-packages/pgserver/pginstall/bin';
-const work = path.join(root, 'artifacts', 'private', 'pgtest', 'm1');
+const pgTests = path.join(root, 'artifacts', 'private', 'pgtest');
+await mkdir(pgTests,{recursive:true,mode:0o700});
+const work = await mkdtemp(path.join(pgTests,'m1-m2-'));
 const data = path.join(work, 'data');
 const socket = path.join(work, 'socket');
 const log = path.join(work, 'postgres.log');
@@ -76,7 +78,6 @@ function url(role, password) {
 let started = false;
 try {
   await stat(path.join(pgBin, 'initdb'));
-  await rm(work, { recursive: true, force: true });
   await mkdir(socket, { recursive: true, mode: 0o700 });
   await mkdir(assetDir, { recursive: true, mode: 0o700 });
 
@@ -130,6 +131,36 @@ CREATE ROLE campuslingo_recovery LOGIN PASSWORD '${passwords.recovery}';
     'database bootstrap',
   );
 
+  requireSuccess(psql(['-v','ON_ERROR_STOP=1','-U','postgres','-d','campuslingo_test',
+    '-c','CREATE EXTENSION vector']), 'private pgvector provisioning');
+
+  requireSuccess(
+    psql([
+      '-v',
+      'ON_ERROR_STOP=1',
+      '-U',
+      'postgres',
+      '-d',
+      'postgres',
+      '-c',
+      'CREATE DATABASE campuslingo_restore_drill OWNER campuslingo_owner',
+    ]),
+    'restore drill database bootstrap',
+  );
+  requireSuccess(
+    psql([
+      '-v',
+      'ON_ERROR_STOP=1',
+      '-U',
+      'postgres',
+      '-d',
+      'campuslingo_restore_drill',
+      '-c',
+      'CREATE EXTENSION vector',
+    ]),
+    'restore drill pgvector provisioning',
+  );
+
   run(process.env.CARGO ?? 'cargo', ['run', '--quiet', '-p', 'campuslingo-server', '--', 'migrate'], {
     env: {
       CAMPUSLINGO_ADMIN_DATABASE_URL: url('campuslingo_owner', passwords.owner),
@@ -149,6 +180,18 @@ CREATE ROLE campuslingo_recovery LOGIN PASSWORD '${passwords.recovery}';
     ]),
     'grant application',
   );
+  requireSuccess(psql(['-v','ON_ERROR_STOP=1','-U','campuslingo_owner','-d','campuslingo_test',
+    '-f',path.join(root,'scripts','m2_grants.sql')]),'M2 grant application');
+  requireSuccess(psql(['-v','ON_ERROR_STOP=1','-U','campuslingo_owner','-d','campuslingo_test',
+    '-f',path.join(root,'scripts','m3_grants.sql')]),'M3 grant application');
+  requireSuccess(psql(['-v','ON_ERROR_STOP=1','-U','campuslingo_owner','-d','campuslingo_test',
+    '-f',path.join(root,'scripts','m4_grants.sql')]),'M4 grant application');
+  requireSuccess(psql(['-v','ON_ERROR_STOP=1','-U','campuslingo_owner','-d','campuslingo_test',
+    '-f',path.join(root,'scripts','m5_grants.sql')]),'M5 grant application');
+  requireSuccess(psql(['-v','ON_ERROR_STOP=1','-U','campuslingo_owner','-d','campuslingo_test',
+    '-f',path.join(root,'scripts','m6_grants.sql')]),'M6 grant application');
+  requireSuccess(psql(['-v','ON_ERROR_STOP=1','-U','campuslingo_owner','-d','campuslingo_test',
+    '-f',path.join(root,'scripts','m7_grants.sql')]),'M7 grant application');
 
   if (keep) {
     await writeFile(
@@ -194,6 +237,8 @@ CREATE ROLE campuslingo_recovery LOGIN PASSWORD '${passwords.recovery}';
       CAMPUSLINGO_TEST_GRADER_URL: url('campuslingo_grader', passwords.grader),
       CAMPUSLINGO_TEST_WORKER_URL: url('campuslingo_worker', passwords.worker),
       CAMPUSLINGO_TEST_RECOVERY_URL: url('campuslingo_recovery', passwords.recovery),
+      CAMPUSLINGO_TEST_RESTORE_URL: `postgres://campuslingo_owner:${passwords.owner}@127.0.0.1:${port}/campuslingo_restore_drill`,
+      CAMPUSLINGO_PG_BIN: pgBin,
       CAMPUSLINGO_TEST_ASSET_DIR: assetDir,
       CAMPUSLINGO_RECOVERY_KEY: randomBytes(32).toString('hex'),
       RUST_BACKTRACE: '1',

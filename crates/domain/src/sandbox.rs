@@ -13,6 +13,21 @@ pub struct ValidationResult {
     pub proof_domain: &'static str,
 }
 
+#[derive(Debug, Clone, Serialize)]
+pub struct TargetEvaluation {
+    pub name: String,
+    pub value: f64,
+    pub lower: f64,
+    pub upper: f64,
+    pub in_bounds: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct StateEvaluation {
+    pub solved: bool,
+    pub targets: Vec<TargetEvaluation>,
+}
+
 fn identifier(value: &str) -> bool {
     !value.is_empty()
         && value.len() <= 48
@@ -186,9 +201,83 @@ pub fn verify(spec: &SandboxSpec) -> Result<ValidationResult, String> {
             result.witness = Some(values);
         }
     }
+    if result.witness.is_some() {
+        let initial_values: BTreeMap<String, f64> = spec
+            .parameters
+            .iter()
+            .map(|parameter| (parameter.name.clone(), parameter.initial))
+            .collect();
+        let mut initial_solved = true;
+        for target in &spec.targets {
+            match evaluate(&target.expression, &initial_values) {
+                Ok(output) => initial_solved &= output >= target.lower && output <= target.upper,
+                Err(reason) => {
+                    result.reason = reason;
+                    result.witness = None;
+                    return Ok(result);
+                }
+            }
+        }
+        if initial_solved {
+            result.valid = false;
+            result.witness = None;
+            result.reason = "initial state already satisfies all targets".into();
+            return Ok(result);
+        }
+    }
     result.valid = result.witness.is_some();
     if result.valid {
         result.reason = "all states safe; target reachable".into();
     }
     Ok(result)
+}
+
+/// Evaluate all declared `SandboxSpec` targets at one concrete parameter
+/// assignment using the canonical AST evaluator shared with native verification.
+pub fn evaluate_state(
+    spec: &SandboxSpec,
+    values: &BTreeMap<String, f64>,
+) -> Result<StateEvaluation, String> {
+    if !(1..=4).contains(&spec.parameters.len()) || !(1..=8).contains(&spec.targets.len()) {
+        return Err("sandbox count budget exceeded".into());
+    }
+    let mut names = BTreeSet::new();
+    let mut bound = BTreeMap::new();
+    for parameter in &spec.parameters {
+        if !names.insert(parameter.name.as_str()) {
+            return Err("duplicate parameter".into());
+        }
+        let grid = parameter.values()?;
+        let candidate = values
+            .get(&parameter.name)
+            .copied()
+            .unwrap_or(parameter.initial);
+        if !candidate.is_finite() || !grid.iter().any(|&point| (point - candidate).abs() <= 1e-6) {
+            return Err("parameter assignment not on declared discrete grid".into());
+        }
+        bound.insert(parameter.name.clone(), candidate);
+    }
+    let mut targets = Vec::with_capacity(spec.targets.len());
+    let mut solved = true;
+    for target in &spec.targets {
+        if !identifier(&target.name)
+            || !target.lower.is_finite()
+            || !target.upper.is_finite()
+            || target.upper < target.lower
+        {
+            return Err("invalid target".into());
+        }
+        check_expression(&target.expression, &names, 1, &mut 0)?;
+        let value = evaluate(&target.expression, &bound)?;
+        let in_bounds = value >= target.lower && value <= target.upper;
+        solved &= in_bounds;
+        targets.push(TargetEvaluation {
+            name: target.name.clone(),
+            value,
+            lower: target.lower,
+            upper: target.upper,
+            in_bounds,
+        });
+    }
+    Ok(StateEvaluation { solved, targets })
 }

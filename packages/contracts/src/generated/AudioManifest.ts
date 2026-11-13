@@ -4,7 +4,7 @@
  * This interface was referenced by `AudioManifest`'s JSON-Schema
  * via the `definition` "AlignmentMethod".
  */
-export type AlignmentMethod = "model_durations" | "forced_alignment" | "asr_estimate";
+export type AlignmentMethod = "model_durations" | "forced_alignment" | "asr_estimate" | "CLAUSE_CONCAT";
 /**
  * This interface was referenced by `AudioManifest`'s JSON-Schema
  * via the `definition` "Codec".
@@ -20,8 +20,12 @@ export interface AudioManifest {
   alignment_method: AlignmentMethod;
   asset_id: string;
   codec: Codec;
+  degraded?: boolean | null;
   duration_ms: number;
   language: Language;
+  normalized_wer?: number | null;
+  quality_gate_passed?: boolean | null;
+  quality_note?: string | null;
   text: string;
   words: AudioWord[];
 }

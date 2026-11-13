@@ -13,6 +13,7 @@ artifacts/private/
 artifacts/benchmarks/*.json
 !artifacts/benchmarks/m0-status.json
 !artifacts/benchmarks/native-wasm-parity.json
+!artifacts/benchmarks/g4-sequential-chains.json
 !artifacts/benchmarks/m1-server-load.json
 !artifacts/benchmarks/server-load.json
 artifacts/toolchain/
@@ -21,9 +22,12 @@ models/
 *.onnx
 *.pdf
 !tests/fixtures/m2/annotated-english.pdf
+!tests/fixtures/m2/region-cases.pdf
 dist/
 .next/
 *.egg-info/
 server.pid
 target/
 packages/engine/generated/
+packages/game-client/public/controller.js
+packages/game-client/public/shell.js

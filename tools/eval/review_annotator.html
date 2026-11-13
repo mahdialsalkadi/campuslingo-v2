@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src file:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<title>Private M2 review annotator</title>
+<style>
+  :root { color-scheme: light; }
+  body { font: 15px/1.45 system-ui, sans-serif; margin: 0; background: #ececec; color: #171717; }
+  header, footer { position: sticky; z-index: 5; background: #fff; border-bottom: 1px solid #bbb; padding: .9rem 1.2rem; }
+  footer { bottom: 0; border-top: 1px solid #bbb; border-bottom: 0; }
+  main { padding: 1rem 1.2rem 6rem; }
+  h1 { font-size: 1.25rem; margin: 0 0 .35rem; }
+  h2 { font-size: 1.05rem; margin: 0 0 .4rem; }
+  .muted { color: #555; }
+  .warn { color: #8a1c1c; font-weight: 600; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: .7rem 1.1rem; align-items: center; }
+  .toolbar label { display: inline-flex; gap: .35rem; align-items: center; }
+  input[type=text], input[type=datetime-local], select, textarea {
+    font: inherit; padding: .3rem .4rem; border: 1px solid #999; background: #fff; color: #111;
+  }
+  textarea { width: 100%; min-height: 4.5rem; box-sizing: border-box; }
+  section.sample { background: #fff; border: 1px solid #bbb; border-radius: 6px; margin: 1rem 0; padding: 1rem; }
+  .meta { margin: .2rem 0 .7rem; color: #444; }
+  .stage { position: relative; display: inline-block; max-width: 100%; background: #fff; border: 1px solid #ccc; }
+  .stage img { display: block; width: 100%; height: auto; }
+  .stage svg.draw { position: absolute; inset: 0; width: 100%; height: 100%; touch-action: none; cursor: crosshair; }
+  .figures { display: flex; flex-wrap: wrap; gap: .6rem; margin: .8rem 0; }
+  figure { margin: 0; background: #f7f7f7; border: 1px solid #ddd; padding: .35rem; max-width: 44%; }
+  figure img { display: block; max-width: 100%; max-height: 380px; }
+  figcaption { font-size: 12px; color: #444; margin-top: .2rem; }
+  .refs { margin: .5rem 0; padding-left: 1.2rem; }
+  .refs li { margin: .15rem 0; }
+  .refs button { margin-left: .5rem; font-size: 12px; }
+  .checks { display: grid; grid-template-columns: max-content minmax(8rem, 1fr); gap: .3rem .8rem; align-items: center; margin: .6rem 0; }
+  .checks select { width: 100%; }
+  .review-state { display: flex; flex-wrap: wrap; gap: .8rem 1.4rem; margin: .7rem 0; padding: .6rem; background: #fafafa; border: 1px dashed #aaa; }
+  .review-state label { display: inline-flex; gap: .35rem; align-items: center; }
+  #output { margin-top: .6rem; min-height: 10rem; font-family: ui-monospace, monospace; font-size: 12px; }
+  .legend { display: flex; gap: 1rem; flex-wrap: wrap; font-size: 12px; margin: .3rem 0; }
+  .swatch { display: inline-block; width: 1.8rem; height: .55rem; vertical-align: middle; margin-right: .25rem; }
+  @media (max-width: 700px) { figure { max-width: 100%; } }
+</style>
+<body>
+<header>
+  <h1>Host-local M2 review annotator</h1>
+  <p class="muted" style="margin:.2rem 0 .6rem">
+    Private lecture derivatives. Keep this page on this host; do not open it in a remote browser,
+    upload it, or paste it into an annotation service. The page makes no network requests.
+    Draw boxes on the source raster in top-left CropBox <strong>points</strong>; the same coordinate
+    system as the stored predictions. Predicted boxes are shown for comparison only and are never edited.
+  </p>
+  <div class="toolbar">
+    <label>Reviewer <input type="text" id="reviewer" size="28" placeholder="Name or local identifier"></label>
+    <label>Reviewed at <input type="datetime-local" id="reviewed-at"></label>
+    <label><input type="checkbox" id="independent"> I declare this review is independent of the extraction pipeline</label>
+    <button type="button" id="export">Export annotations JSON</button>
+  </div>
+  <p class="muted" style="margin:.55rem 0 0">
+    Agent-assisted or author self-review is not independent review. The exporter records your declaration
+    but the scorer always keeps <code>independent_review_verified: false</code> and
+    <code>annotated_corpus_acceptance: false</code>. G-1 stays OPEN.
+  </p>
+</header>
+<main id="samples"></main>
+<footer>
+  <div class="toolbar">
+    <button type="button" id="export-bottom">Export annotations JSON</button>
+    <span class="muted" id="summary"></span>
+  </div>
+  <textarea id="output" hidden spellcheck="false" aria-label="Exported annotations JSON"></textarea>
+</footer>
+<script id="packet-data" type="application/json">__PACKET__</script>
+<script id="visual-data" type="application/json">__VISUALS__</script>
+<script>
+(() => {
+  'use strict';
+  const NS = 'http://www.w3.org/2000/svg';
+  const packet = JSON.parse(document.getElementById('packet-data').textContent);
+  const visuals = JSON.parse(document.getElementById('visual-data').textContent);
+  const checks = [
+    ['formula_numbers_units_negation_preserved', 'Formula, numbers, units and negation preserved'],
+    ['code_indentation_preserved', 'Code indentation preserved'],
+    ['diagram_labels_complete', 'Diagram labels complete'],
+    ['prose_barrier_respected', 'No clean prose block crossed by a crop']
+  ];
+  const colors = { image: '#1769aa', vector: '#7b2fbe', math: '#b3261e' };
+  const clamp = (value, low, high) => Math.min(high, Math.max(low, value));
+  const titleCase = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+  let nextId = 1;
+  const states = [];
+
+  function element(tag, attrs = {}, text = null) {
+    const node = document.createElement(tag);
+    for (const [key, value] of Object.entries(attrs)) {
+      if (key === 'className') node.className = value;
+      else if (key === 'textContent') node.textContent = value;
+      else if (key === 'checked') node.checked = Boolean(value);
+      else if (key === 'value') node.value = value;
+      else node.setAttribute(key, value);
+    }
+    if (text !== null) node.textContent = text;
+    return node;
+  }
+  function svg(tag, attrs = {}) {
+    const node = document.createElementNS(NS, tag);
+    for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
+    return node;
+  }
+  function fmt(value) { return Number(value).toFixed(2); }
+
+  function draw(sample, state) {
+    const { svg: layer, width, height } = state;
+    layer.replaceChildren();
+    const predictedStroke = Math.max(0.4, width / 350);
+    for (const region of sample.predicted_regions) {
+      const box = region.bbox;
+      const rect = svg('rect', {
+        x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0,
+        fill: 'none', stroke: colors[region.kind] || '#555', 'stroke-width': predictedStroke,
+        'stroke-opacity': 0.55
+      });
+      rect.append(svg('title', {}, `Predicted ${region.kind} ${region.id}`));
+      layer.append(rect);
+    }
+    const referenceStroke = Math.max(0.6, width / 260);
+    for (const region of state.refs) {
+      const box = region.bbox;
+      const rect = svg('rect', {
+        x: box.x0, y: box.y0, width: box.x1 - box.x0, height: box.y1 - box.y0,
+        fill: colors[region.kind] + '22', stroke: colors[region.kind],
+        'stroke-width': referenceStroke, 'stroke-dasharray': `${referenceStroke * 4} ${referenceStroke * 2}`
+      });
+      rect.append(svg('title', {}, `Reference ${region.kind} ${region.id}`));
+      layer.append(rect);
+    }
+    if (state.draft) {
+      const box = state.draft;
+      layer.append(svg('rect', {
+        x: box.x0, y: box.y0, width: Math.max(0.1, box.x1 - box.x0), height: Math.max(0.1, box.y1 - box.y0),
+        fill: '#00000011', stroke: '#111', 'stroke-width': referenceStroke, 'stroke-dasharray': '2 2'
+      }));
+    }
+  }
+
+  function refreshList(state) {
+    const list = state.list;
+    list.replaceChildren();
+    if (!state.refs.length) {
+      list.append(element('li', { className: 'muted' }, 'No reference boxes yet.'));
+      return;
+    }
+    for (const region of state.refs) {
+      const item = element('li', {}, `${titleCase(region.kind)} ${region.id}: ` +
+        `x0=${fmt(region.bbox.x0)}, y0=${fmt(region.bbox.y0)}, ` +
+        `x1=${fmt(region.bbox.x1)}, y1=${fmt(region.bbox.y1)}`);
+      const remove = element('button', { type: 'button' }, 'Delete');
+      remove.addEventListener('click', () => {
+        state.refs = state.refs.filter((candidate) => candidate !== region);
+        draw(state.sample, state);
+        refreshList(state);
+      });
+      item.append(remove);
+      list.append(item);
+    }
+  }
+
+  function build(sample, visual, index) {
+    const state = {
+      sample, visual,
+      refs: (sample.reference_regions || []).map((region) => ({
+        id: region.id, kind: region.kind, bbox: { ...region.bbox }
+      })),
+      kind: 'image', draft: null,
+      complete: sample.reference_regions_complete === true,
+      reviewed: sample.visual_review_status === 'REVIEWED',
+      checks: Object.fromEntries(checks.map(([key]) => [String(key), sample[key]])),
+      notes: sample.reviewer_notes || ''
+    };
+    states.push(state);
+    const section = element('section', { className: 'sample' });
+    section.append(element('h2', {}, `${sample.category} / page ${sample.page}`));
+    section.append(element('p', { className: 'meta' },
+      `${sample.selection_reasons.join('; ')}. Crops: ${sample.crop_count}. ` +
+      `Page: ${fmt(sample.page_size_pt[0])} x ${fmt(sample.page_size_pt[1])} pt. ` +
+      (sample.vector_incomplete.length ? `Explicit vector gaps: ${sample.vector_incomplete.join(', ')}.` : 'No declared vector gaps.')));
+    section.append(element('p', { className: 'meta muted' },
+      'Source raster and overlay are analysis rasters. Reference boxes are scored against stored predictions; ' +
+      'a positive IoU is diagnostic only and never closes G-1.'));
+
+    const legend = element('div', { className: 'legend' });
+    for (const [kind, color] of Object.entries(colors)) {
+      const item = element('span');
+      const swatch = element('span', { className: 'swatch' });
+      swatch.style.background = color;
+      item.append(swatch, document.createTextNode(`${titleCase(kind)} (predicted: solid, reference: dashed)`));
+      legend.append(item);
+    }
+    section.append(legend);
+
+    const stage = element('div', { className: 'stage' });
+    const image = element('img', { src: visual.source, alt: 'Source analysis raster', loading: 'lazy' });
+    const layer = svg('svg', {
+      viewBox: `0 0 ${sample.page_size_pt[0]} ${sample.page_size_pt[1]}`,
+      preserveAspectRatio: 'none', class: 'draw', role: 'img',
+      'aria-label': 'Draw reference rectangles on the source page'
+    });
+    stage.append(image, layer);
+    section.append(stage);
+
+    const controls = element('div', { className: 'toolbar', style: 'margin-top:.6rem' });
+    const kindLabel = element('label', {}, 'Reference kind ');
+    const kind = element('select');
+    for (const value of ['image', 'vector', 'math']) {
+      kind.append(element('option', { value }, titleCase(value)));
+    }
+    kind.addEventListener('change', () => { state.kind = kind.value; });
+    kindLabel.append(kind);
+    const deleteLast = element('button', { type: 'button' }, 'Delete last box');
+    deleteLast.addEventListener('click', () => {
+      state.refs.pop();
+      draw(sample, state);
+      refreshList(state);
+    });
+    const reset = element('button', { type: 'button' }, 'Clear all boxes');
+    reset.addEventListener('click', () => {
+      if (!state.refs.length || confirm('Clear every reference box on this page?')) {
+        state.refs = [];
+        draw(sample, state);
+        refreshList(state);
+      }
+    });
+    controls.append(kindLabel, deleteLast, reset,
+      element('span', { className: 'muted' }, 'Drag on the page to add a box.'));
+    section.append(controls);
+
+    const list = element('ol', { className: 'refs' });
+    state.list = list;
+    section.append(list);
+
+    const figures = element('div', { className: 'figures' });
+    for (const crop of visual.crops) {
+      const figure = element('figure');
+      figure.append(element('img', { src: crop.url, alt: `${crop.kind} crop ${crop.id}`, loading: 'lazy' }));
+      figure.append(element('figcaption', {}, `${crop.kind} / ${crop.id}`));
+      figures.append(figure);
+    }
+    if (visual.overlay) {
+      const figure = element('figure');
+      figure.append(element('img', { src: visual.overlay, alt: 'Action overlay', loading: 'lazy' }));
+      figure.append(element('figcaption', {}, 'Action overlay'));
+      figures.append(figure);
+    }
+    if (figures.childElementCount) section.append(figures);
+
+    const checkGrid = element('div', { className: 'checks' });
+    for (const [key, label] of checks) {
+      checkGrid.append(element('label', { for: `check-${index}-${key}` }, label));
+      const select = element('select', { id: `check-${index}-${key}` });
+      select.append(element('option', { value: '' }, 'Unassessed'));
+      select.append(element('option', { value: 'true' }, 'Pass'));
+      select.append(element('option', { value: 'false' }, 'Fail'));
+      select.value = state.checks[key] === null || state.checks[key] === undefined ? '' : String(state.checks[key]);
+      select.addEventListener('change', () => {
+        state.checks[key] = select.value === '' ? null : select.value === 'true';
+      });
+      checkGrid.append(select);
+    }
+    section.append(checkGrid);
+
+    const notes = element('textarea', { placeholder: 'Reviewer notes (local only)', spellcheck: 'false' });
+    notes.value = state.notes;
+    notes.addEventListener('input', () => { state.notes = notes.value; });
+    section.append(notes);
+
+    const reviewState = element('div', { className: 'review-state' });
+    const completeLabel = element('label');
+    const complete = element('input', { type: 'checkbox', checked: state.complete });
+    complete.addEventListener('change', () => { state.complete = complete.checked; });
+    completeLabel.append(complete, document.createTextNode(' Reference regions are complete for the target crop types'));
+    const reviewedLabel = element('label');
+    const reviewed = element('input', { type: 'checkbox', checked: state.reviewed });
+    reviewed.addEventListener('change', () => { state.reviewed = reviewed.checked; });
+    reviewedLabel.append(reviewed, document.createTextNode(' I visually reviewed this sample'));
+    reviewState.append(completeLabel, reviewedLabel);
+    section.append(reviewState);
+
+    layer.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0 || !layer.setPointerCapture) return;
+      event.preventDefault();
+      const point = (e) => {
+        const rect = layer.getBoundingClientRect();
+        return {
+          x: clamp((e.clientX - rect.left) / rect.width * sample.page_size_pt[0], 0, sample.page_size_pt[0]),
+          y: clamp((e.clientY - rect.top) / rect.height * sample.page_size_pt[1], 0, sample.page_size_pt[1])
+        };
+      };
+      const start = point(event);
+      state.draft = { x0: start.x, y0: start.y, x1: start.x, y1: start.y };
+      try { layer.setPointerCapture(event.pointerId); } catch (_) {}
+      const move = (e) => {
+        const current = point(e);
+        state.draft = {
+          x0: Math.min(start.x, current.x), y0: Math.min(start.y, current.y),
+          x1: Math.max(start.x, current.x), y1: Math.max(start.y, current.y)
+        };
+        draw(sample, state);
+      };
+      const up = (e) => {
+        layer.removeEventListener('pointermove', move);
+        layer.removeEventListener('pointerup', up);
+        layer.removeEventListener('pointercancel', up);
+        if (state.draft && state.draft.x1 - state.draft.x0 > 0.5 && state.draft.y1 - state.draft.y0 > 0.5) {
+          state.refs.push({
+            id: `r-${index}-${nextId++}`, kind: state.kind,
+            bbox: { ...state.draft }
+          });
+        }
+        state.draft = null;
+        draw(sample, state);
+        refreshList(state);
+        try { layer.releasePointerCapture(e.pointerId); } catch (_) {}
+      };
+      layer.addEventListener('pointermove', move);
+      layer.addEventListener('pointerup', up);
+      layer.addEventListener('pointercancel', up);
+    });
+
+    draw(sample, state);
+    refreshList(state);
+    return section;
+  }
+
+  const main = document.getElementById('samples');
+  packet.samples.forEach((sample, index) => {
+    main.append(build(sample, visuals[index], index));
+  });
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById('reviewed-at').value = now.toISOString().slice(0, 16);
+
+  function exportPacket() {
+    const reviewer = document.getElementById('reviewer').value.trim();
+    const reviewedAtRaw = document.getElementById('reviewed-at').value;
+    const reviewedAt = reviewedAtRaw ? new Date(reviewedAtRaw).toISOString() : null;
+    const anyReviewed = states.some((state) => state.reviewed);
+    if (anyReviewed && !reviewer) {
+      alert('Enter the reviewer name or local identifier before exporting reviewed samples.');
+      return;
+    }
+    if (anyReviewed && !reviewedAt) {
+      alert('Enter a valid review timestamp before exporting reviewed samples.');
+      return;
+    }
+    for (const [index, state] of states.entries()) {
+      if (!state.reviewed && !state.complete) continue;
+      const seen = new Set();
+      for (const region of state.refs) {
+        const box = region.bbox;
+        const finite = ['x0', 'y0', 'x1', 'y1'].every((key) => Number.isFinite(box[key]));
+        const valid = finite && box.x0 >= 0 && box.y0 >= 0 && box.x1 > box.x0 && box.y1 > box.y0 &&
+          box.x1 <= state.sample.page_size_pt[0] && box.y1 <= state.sample.page_size_pt[1];
+        if (!valid || seen.has(region.id) || !['image', 'vector', 'math'].includes(region.kind)) {
+          alert(`Invalid reference box on page ${state.sample.page}. Fix it before exporting.`);
+          return;
+        }
+        seen.add(region.id);
+      }
+      if (state.reviewed && !state.complete) {
+        alert(`Page ${state.sample.page} is marked reviewed but not complete. Mark both only after review.`);
+        return;
+      }
+      if (state.reviewed && !state.refs.length &&
+          !confirm(`Page ${state.sample.page} has no reference boxes. Export it as a reviewed empty reference set?`)) {
+        return;
+      }
+    }
+    const output = JSON.parse(JSON.stringify(packet));
+    output.reviewer = reviewer || null;
+    output.reviewed_at = anyReviewed ? reviewedAt : null;
+    output.independent_review = document.getElementById('independent').checked;
+    output.status = anyReviewed ? 'REVIEWED' : 'NOT_REVIEWED';
+    output.samples.forEach((sample, index) => {
+      const state = states[index];
+      sample.reference_regions = state.refs.map((region) => ({
+        id: region.id, kind: region.kind,
+        bbox: { x0: region.bbox.x0, y0: region.bbox.y0, x1: region.bbox.x1, y1: region.bbox.y1 }
+      }));
+      sample.reference_regions_complete = state.complete;
+      sample.visual_review_status = state.reviewed ? 'REVIEWED' : 'NOT_REVIEWED';
+      for (const [key] of checks) sample[key] = state.checks[key] === undefined ? null : state.checks[key];
+      sample.reviewer_notes = state.notes;
+    });
+    const text = JSON.stringify(output, null, 2) + '\n';
+    const area = document.getElementById('output');
+    area.hidden = false;
+    area.value = text;
+    document.getElementById('summary').textContent =
+      `${states.filter((state) => state.reviewed).length} reviewed, ` +
+      `${states.filter((state) => !state.reviewed).length} not reviewed, ` +
+      `${states.reduce((sum, state) => sum + state.refs.length, 0)} reference boxes. ` +
+      'G-1 remains OPEN.';
+    try {
+      const blob = new Blob([text], { type: 'application/json' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'annotations.reviewed.json';
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 2000);
+    } catch (_) {
+      // The textarea remains the reliable local export path.
+    }
+    area.focus();
+    area.select();
+  }
+  document.getElementById('export').addEventListener('click', exportPacket);
+  document.getElementById('export-bottom').addEventListener('click', exportPacket);
+  document.getElementById('summary').textContent =
+    `${states.length} samples; ${states.filter((state) => state.reviewed).length} already marked reviewed. G-1 remains OPEN.`;
+})();
+</script>
+</body>
+</html>
