@@ -16,8 +16,9 @@ artifacts/benchmarks/*.json
 !artifacts/benchmarks/g4-sequential-chains.json
 !artifacts/benchmarks/m1-server-load.json
 !artifacts/benchmarks/server-load.json
+!artifacts/benchmarks/m7-*.json
 artifacts/toolchain/
-models/
+/models/
 *.gguf
 *.onnx
 *.pdf

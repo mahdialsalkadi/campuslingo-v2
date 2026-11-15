@@ -1,0 +1,97 @@
+{
+  "observed_at": "2026-11-13T09:33:39.163Z",
+  "milestone": "M7",
+  "gate": "O-06",
+  "run1_standalone": {
+    "label": "run1_standalone",
+    "players": 30,
+    "simultaneous_duels": 15,
+    "settled_duels": 15,
+    "duration_ms": 633.26,
+    "error_count": 0,
+    "http_latency_ms": {
+      "count": 60,
+      "p50": 6.395,
+      "p95": 91.193,
+      "p99": 102.665,
+      "max": 102.665
+    },
+    "ws_heartbeat_latency_ms": {
+      "count": 30,
+      "p50": 2.66,
+      "p95": 3.921,
+      "p99": 3.962,
+      "max": 3.962
+    },
+    "ws_strike_roundtrip_ms": {
+      "count": 90,
+      "p50": 33.281,
+      "p95": 72.69,
+      "p99": 76.807,
+      "max": 76.807
+    },
+    "round_deadline_response_ms": {
+      "count": 45,
+      "p50": 41.376,
+      "p95": 42.564,
+      "p99": 44.041,
+      "max": 44.041
+    },
+    "rust_server_idle_rss_bytes": 5877760,
+    "rust_server_peak_rss_bytes": 13438976,
+    "rust_server_rss_under_50mib": true,
+    "background_ingestion": null
+  },
+  "run2_concurrent_with_ingestion": {
+    "label": "run2_concurrent_with_modellease_tts",
+    "players": 30,
+    "simultaneous_duels": 15,
+    "settled_duels": 15,
+    "duration_ms": 2389.67,
+    "error_count": 0,
+    "http_latency_ms": {
+      "count": 60,
+      "p50": 8.399,
+      "p95": 31.288,
+      "p99": 31.877,
+      "max": 31.877
+    },
+    "ws_heartbeat_latency_ms": {
+      "count": 30,
+      "p50": 1.138,
+      "p95": 1.32,
+      "p99": 1.352,
+      "max": 1.352
+    },
+    "ws_strike_roundtrip_ms": {
+      "count": 90,
+      "p50": 54.399,
+      "p95": 68.32,
+      "p99": 72.058,
+      "max": 72.058
+    },
+    "round_deadline_response_ms": {
+      "count": 45,
+      "p50": 41.205,
+      "p95": 42.532,
+      "p99": 42.685,
+      "max": 42.685
+    },
+    "rust_server_idle_rss_bytes": 5877760,
+    "rust_server_peak_rss_bytes": 14135296,
+    "rust_server_rss_under_50mib": true,
+    "background_ingestion": {
+      "exit_code": 0,
+      "duration_ms": 2373.3,
+      "passed": true,
+      "stderr_tail": null
+    }
+  },
+  "readiness_http_after_waves": 200,
+  "cgroup": {
+    "cgroup_path": "/user.slice/user-1000.slice/user@1000.service/app.slice/run-p1576564-i1572579.service/supervisor",
+    "memory_peak_bytes": 504180736,
+    "memory_swap_current_bytes": 0
+  },
+  "status": "PASSED_O06_30P_15DUELS_STANDALONE_AND_CONCURRENT"
+}

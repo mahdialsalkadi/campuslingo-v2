@@ -1,0 +1,121 @@
+{
+  "observed_at": "2026-11-13T09:31:29.501Z",
+  "milestone": "M7",
+  "gate": "O-08",
+  "lockfiles": {
+    "Cargo.lock": {
+      "present": true,
+      "bytes": 75718,
+      "sha256": "5fc23f41203fd85ea6b2cb7ca331fe3b4e3526776f9f5fde56456dfb0854b34c",
+      "exact_version_pins": true
+    },
+    "package-lock.json": {
+      "present": true,
+      "bytes": 30444,
+      "sha256": "b2154bc493ebed258682789c2427cfc8991267ec2675d5c537e060bd1df69a8d",
+      "node_engines": {
+        "node": ">=22 <23"
+      },
+      "dev_dependencies": {
+        "@types/node": "22.19.11",
+        "json-schema-to-typescript": "16.0.0",
+        "tsx": "4.23.15",
+        "typescript": "5.9.3"
+      }
+    }
+  },
+  "schema_migrations_0001_to_0008": [
+    {
+      "file": "0001_foundation.sql",
+      "bytes": 18395,
+      "sha256": "58c4383a6892e2a05a03539d1b5b4c3cdfed7cf81d493c44e686872ddebc5a23"
+    },
+    {
+      "file": "0002_recovery_delivery.sql",
+      "bytes": 423,
+      "sha256": "ce0e2d2f936b081c96eba0615c6bb9745e44a76b3544fce6d599af3a5bf141b0"
+    },
+    {
+      "file": "0003_ingestion.sql",
+      "bytes": 7413,
+      "sha256": "27163773be4c2267d3d2d75bd985bfb223116c738ac9e4c54fb40ab0cc881f4f"
+    },
+    {
+      "file": "0004_m3_generation.sql",
+      "bytes": 10744,
+      "sha256": "d859f06dfbe793e37f89463f609c09c70c80b7004e49bf7f8f7e14aeafd4c042"
+    },
+    {
+      "file": "0005_m4_shields_and_quarantine.sql",
+      "bytes": 32089,
+      "sha256": "889483415f9222b7338fa21b0f5a1a4a9098563ace3334000c828e84856bc25d"
+    },
+    {
+      "file": "0006_m5_duels_and_replays.sql",
+      "bytes": 25578,
+      "sha256": "3971a392fae686f05f438071caf1aa5c065c5d1f141627ca97272f9d4119fa59"
+    },
+    {
+      "file": "0007_m6_raids_economy_leagues_clans.sql",
+      "bytes": 52801,
+      "sha256": "e9439258a698efd2147cdfdad5fd067822eb83a98727f85266c167f42d275bf3"
+    },
+    {
+      "file": "0008_m7_notifications_and_hardening.sql",
+      "bytes": 31093,
+      "sha256": "a4466005eefc635735655a63e0e979cf9a8490bdd2531e0e150a6a5d7576339b"
+    }
+  ],
+  "least_privilege_grants_m1_to_m7": [
+    {
+      "file": "m1_grants.sql",
+      "bytes": 3406,
+      "sha256": "ab21837bc28822cdab2e62d4487560bdd8e73fd364275b34403dfd11cad3c36e"
+    },
+    {
+      "file": "m2_grants.sql",
+      "bytes": 616,
+      "sha256": "268a680c7292f8b0fc3be3df95b5d02341118871a95e2815be37a05bba3fb1c6"
+    },
+    {
+      "file": "m3_grants.sql",
+      "bytes": 507,
+      "sha256": "2a0c04da09133e56b51316fbc69c71a56c951ea03788a8e3231082f5a09d9154"
+    },
+    {
+      "file": "m4_grants.sql",
+      "bytes": 1712,
+      "sha256": "1c75d3ce0567d81d7384d57efe881beba910ae78a5a49d09448d14bfc9f13943"
+    },
+    {
+      "file": "m5_grants.sql",
+      "bytes": 2107,
+      "sha256": "1104e639850ba680d7820b37dbca0e43842d694cff66f99ab4cd2fc163cefad5"
+    },
+    {
+      "file": "m6_grants.sql",
+      "bytes": 2283,
+      "sha256": "4182a7e08d25d541905ca68ff8668066ce9fa3f3055072eba9dcefdf9520ef28"
+    },
+    {
+      "file": "m7_grants.sql",
+      "bytes": 1813,
+      "sha256": "d10fe2de4be3616047d6e1a029d7cddc5d2176a9c6f3af12796735f49d1bc631"
+    }
+  ],
+  "pinned_model_artifacts": {
+    "model_audit_count": 0,
+    "piper_ar_onnx": {
+      "file": "artifacts/private/models/piper-ar/ar_JO-kareem-medium.onnx",
+      "revision": "cf910fb59f1d79ab3b625a63993a108751c6c25d",
+      "bytes": 63201294,
+      "sha256": "9e95cab07b679da603bba17c4dec7ab3111320571964ee95c0379603c086491e"
+    },
+    "piper_ar_config": {
+      "file": "artifacts/private/models/piper-ar/ar_JO-kareem-medium.onnx.json",
+      "bytes": 5024,
+      "sha256": "ea6d9b9d9076dbdb6bf5c98c6a141ef154959d2359709b37855727964e7d6c4d"
+    }
+  },
+  "status": "PASSED_LOCKED_AND_HASH_PINNED"
+}

@@ -1,0 +1,51 @@
+{
+  "observed_at": "2026-11-13T09:31:29.328Z",
+  "milestone": "M7",
+  "gate": "O-04",
+  "host": {
+    "total_ram_bytes": 12242141184,
+    "reserved_headroom_bytes": 2147483648,
+    "online_budget_bytes": 52428800,
+    "containment_cgroup_memory_max_bytes": 8589934592,
+    "swap_budget_bytes": 0
+  },
+  "workloads": {
+    "ocr_glm_q8": {
+      "model_id": "PaddleOCR-VL-1.5 / GLM-OCR Q8_0",
+      "cpu_only": {
+        "cold_latency_ms": 68400,
+        "peak_rss_bytes": 1834303488,
+        "note": "Measured M2 single-image OCR CPU fallback"
+      },
+      "vulkan0": {
+        "cold_and_warm_observed": true,
+        "peak_rss_bytes": 564310016,
+        "host_rss_reduction_ratio": 3.25,
+        "note": "Vulkan0 offload cuts host RSS by >3.2x inside unified APUs under 2 GiB headroom guard"
+      }
+    },
+    "llm_qwen35_4b": {
+      "execution_mode": "Vulkan0 single-resident under ModelLease",
+      "pass1_ms": 2282,
+      "pass2_ms": 22327,
+      "peak_rss_bytes": 422637568,
+      "cgroup_peak_bytes": 718798848,
+      "restarts": 0
+    },
+    "tts_english_kokoro_82m": {
+      "execution_mode": "CPU ONNX Runtime + espeak-ng en-us under ModelLease",
+      "artifact_bytes": 325532346,
+      "duration_ms": 5190,
+      "peak_rss_bytes": 570425344,
+      "cgroup_peak_bytes": 1051931443
+    },
+    "tts_arabic_piper_ar_jo_kareem": {
+      "execution_mode": "CPU ONNX Runtime + espeak-ng ar under ModelLease (single-resident)",
+      "artifact_bytes": 63201294,
+      "synthesis_wall_ms": 2740,
+      "peak_rss_bytes": 226492416,
+      "cgroup_peak_bytes": 755708723
+    }
+  },
+  "policy_verdict": "PASSED_SINGLE_MODEL_RESIDENT_WITH_VULKAN0_OFFLOAD_AND_CPU_ONNX_TTS"
+}
