@@ -1,0 +1,35 @@
+{
+  "units": {
+    "squire_footman": {
+      "hp": 110, "dps": 14.0, "attack_interval": 0.80, "speed_cells": 1.8, "range_cells": 0.6,
+      "priority": "ANY", "wall_mult": 1.0, "layer": "GROUND", "housing": 1, "cost_elixir": 25, "projectile": "",
+      "target_h": 1.48, "max_xz": 1.1, "model": "res://assets/models/troops/squire_footman"
+    },
+    "lexi_archer": {
+      "hp": 48, "dps": 12.0, "attack_interval": 0.80, "speed_cells": 1.9, "range_cells": 3.5,
+      "priority": "ANY", "wall_mult": 1.0, "layer": "GROUND", "housing": 1, "cost_elixir": 40, "projectile": "arrow",
+      "target_h": 1.42, "max_xz": 1.0, "model": "res://assets/models/troops/lexi_archer"
+    },
+    "thesis_breaker": {
+      "hp": 75, "dps": 25.0, "attack_interval": 0.80, "speed_cells": 2.4, "range_cells": 0.6,
+      "priority": "WALL", "wall_mult": 4.0, "layer": "GROUND", "housing": 2, "cost_elixir": 80, "projectile": "",
+      "target_h": 1.38, "max_xz": 1.1, "model": "res://assets/models/troops/thesis_breaker"
+    },
+    "formula_giant": {
+      "hp": 540, "dps": 26.0, "attack_interval": 1.20, "speed_cells": 1.1, "range_cells": 0.7,
+      "priority": "DEFENSE", "wall_mult": 1.0, "layer": "GROUND", "housing": 5, "cost_elixir": 150, "projectile": "",
+      "target_h": 2.15, "max_xz": 1.5, "model": "res://assets/models/troops/formula_giant"
+    },
+    "glyph_drake": {
+      "hp": 620, "dps": 42.0, "attack_interval": 1.00, "speed_cells": 1.4, "range_cells": 2.2,
+      "priority": "ANY", "wall_mult": 1.0, "layer": "AIR", "housing": 8, "cost_elixir": 280, "projectile": "arrow",
+      "target_h": 1.45, "max_xz": 2.4, "hover_y": 2.4, "model": "res://assets/models/troops/glyph_drake"
+    },
+    "field_scholar_hero": {
+      "hp": 950, "dps": 55.0, "attack_interval": 0.90, "speed_cells": 2.0, "range_cells": 0.8,
+      "priority": "ANY", "wall_mult": 1.0, "layer": "GROUND", "housing": 0, "cost_elixir": 0, "projectile": "",
+      "rally_radius_cells": 5.0, "rally_buff_mult": 1.30, "rally_dur": 6.0,
+      "target_h": 2.05, "max_xz": 1.4, "model": "res://assets/models/troops/field_scholar_hero"
+    }
+  }
+}

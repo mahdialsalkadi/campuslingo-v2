@@ -1,0 +1,23 @@
+{
+  "release": "CampusLingoVillageClash-Linux-x86_64",
+  "renderer": "gl_compatibility",
+  "godot_version": "4.3.stable",
+  "artifacts": {
+    "builds/CampusLingoVillageClash.x86_64": {
+      "bytes": 112626048,
+      "sha256": "4eb06c1a57130b24377f1f56b7fea01b9a0f66c23a08e940e7cbd1430a9fa9f4"
+    },
+    "Docs/progress/m4/m4_playthrough.mp4": {
+      "bytes": 1268649,
+      "sha256": "beaa61742e08258bf5580ae9c9208de240ebb20449c246cc3b35403000ed3262"
+    },
+    "builds/LICENSES.md": {
+      "bytes": 2998,
+      "sha256": "8b4f1365c4f79b7d52cd56ca5fa0e9238ec4fdf521bdabaebf5494b1951a919d"
+    },
+    "builds/README.md": {
+      "bytes": 783,
+      "sha256": "3fe08c021db540c98674227bd60dbb2b79abf481be73c8a0551dcc8bfdcd3df0"
+    }
+  }
+}

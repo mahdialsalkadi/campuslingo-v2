@@ -119,8 +119,8 @@ pub struct FortressNodeView {
     pub world_theme: Option<String>,
     pub archetype: Option<String>,
     pub modifier: Option<String>,
-    pub grid_x: Option<i16>,
-    pub grid_y: Option<i16>,
+    pub grid_x: Option<i32>,
+    pub grid_y: Option<i32>,
     pub shield: Option<CachedNodeShieldRecord>,
 }
 
@@ -1307,8 +1307,8 @@ async fn load_dashboard_view_tx(
         world_theme: Option<String>,
         archetype: Option<String>,
         modifier: Option<String>,
-        grid_x: Option<i16>,
-        grid_y: Option<i16>,
+        grid_x: Option<i32>,
+        grid_y: Option<i32>,
     }
 
     let joined_nodes = sqlx::query_as::<_, JoinedNode>(

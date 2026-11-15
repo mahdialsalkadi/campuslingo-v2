@@ -8,13 +8,14 @@ pub mod m7;
 pub mod recovery;
 pub mod routes;
 
+use std::path::Path as StdPath;
 use std::sync::Arc;
 use std::time::Instant;
 
 use axum::{
     Json, Router,
     body::Body,
-    extract::{DefaultBodyLimit, State},
+    extract::{DefaultBodyLimit, Path, State},
     http::{HeaderValue, Request, StatusCode, header},
     middleware::{self, Next},
     response::{IntoResponse, Response},
@@ -86,8 +87,118 @@ impl AppState {
     }
 }
 
+fn resolve_godot_web_dir(state: &AppState) -> Option<std::path::PathBuf> {
+    if std::env::var("CAMPUSLINGO_LEGACY_WEB")
+        .is_ok_and(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+    {
+        return None;
+    }
+    if let Ok(custom) = std::env::var("CAMPUSLINGO_GODOT_WEB_DIR") {
+        let p = std::path::PathBuf::from(custom);
+        if p.join("index.html").is_file() {
+            return Some(p);
+        }
+    }
+    let uses_default_web = state
+        .settings
+        .web_dir
+        .ends_with(StdPath::new("packages/game-client/public"));
+    if !uses_default_web {
+        return None;
+    }
+    for candidate in [
+        std::path::PathBuf::from("apps/godot/builds/web"),
+        std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../apps/godot/builds/web"),
+    ] {
+        if candidate.join("index.html").is_file() {
+            return Some(candidate);
+        }
+    }
+    None
+}
+
+async fn serve_file_with_cache(path: &StdPath, cache_control: &'static str) -> Response {
+    match tokio::fs::read(path).await {
+        Ok(bytes) => {
+            let ct = content_type_for_path(path);
+            let mut resp = (
+                StatusCode::OK,
+                [(header::CONTENT_TYPE, ct), (header::CACHE_CONTROL, cache_control)],
+                bytes,
+            )
+                .into_response();
+            let _ = &mut resp;
+            resp
+        }
+        Err(_) => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
+async fn serve_godot_or_legacy_index(State(state): State<AppState>) -> Response {
+    if let Some(dir) = resolve_godot_web_dir(&state) {
+        return serve_file_with_cache(&dir.join("index.html"), "no-store").await;
+    }
+    serve_index(State(state)).await
+}
+
+async fn serve_sw_js(State(state): State<AppState>) -> Response {
+    if resolve_godot_web_dir(&state).is_some() {
+        let cleanup_sw = "self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>self.registration.unregister()).then(()=>self.clients.matchAll()).then(cs=>cs.forEach(c=>c.navigate(c.url))));});";
+        return (
+            StatusCode::OK,
+            [
+                (header::CONTENT_TYPE, "application/javascript; charset=utf-8"),
+                (header::CACHE_CONTROL, "no-store"),
+            ],
+            cleanup_sw,
+        )
+            .into_response();
+    }
+    serve_file_from_dir(&state.settings.web_dir, "sw.js").await
+}
+
+async fn serve_root_asset(
+    State(state): State<AppState>,
+    axum::extract::Path(file): axum::extract::Path<String>,
+) -> Response {
+    if file.is_empty()
+        || file.contains('/')
+        || file.contains('\\')
+        || file.contains("..")
+        || file.starts_with('.')
+    {
+        return StatusCode::BAD_REQUEST.into_response();
+    }
+    if let Some(dir) = resolve_godot_web_dir(&state) {
+        let candidate = dir.join(&file);
+        if candidate.is_file() {
+            let cc = if file.ends_with(".html") || file.ends_with(".js") {
+                "no-store"
+            } else {
+                "public, max-age=60"
+            };
+            return serve_file_with_cache(&candidate, cc).await;
+        }
+    }
+    serve_file_from_dir(&state.settings.web_dir, &file).await
+}
+
 pub fn build_router(state: AppState) -> Router {
     Router::new()
+        .route("/", get(serve_godot_or_legacy_index))
+        .route("/index.html", get(serve_godot_or_legacy_index))
+        .route("/legacy", get(serve_index))
+        .route("/legacy/index.html", get(serve_index))
+        .route("/styles.css", get(serve_web_static("styles.css")))
+        .route("/m4-shell.css", get(serve_web_static("m4-shell.css")))
+        .route("/app.mjs", get(serve_web_static("app.mjs")))
+        .route("/controller.js", get(serve_web_static("controller.js")))
+        .route("/shell.js", get(serve_web_static("shell.js")))
+        .route("/manifest.json", get(serve_web_static("manifest.json")))
+        .route("/sw.js", get(serve_sw_js))
+        .route("/{file}", get(serve_root_asset))
+        .route("/icons/{file}", get(serve_icon_file))
+        .route("/wasm/{file}", get(serve_wasm_file))
         .route("/healthz", get(health))
         .route("/readyz", get(readiness))
         .nest("/v1", routes::router())
@@ -96,6 +207,70 @@ pub fn build_router(state: AppState) -> Router {
         .layer(middleware::from_fn(security_headers))
         .layer(middleware::from_fn(log_request))
         .with_state(state)
+}
+
+fn is_safe_filename(name: &str) -> bool {
+    !name.is_empty()
+        && !name.contains("..")
+        && !name.contains('/')
+        && !name.contains('\\')
+        && !name.contains('\0')
+}
+
+fn content_type_for_path(path: &StdPath) -> &'static str {
+    match path.extension().and_then(|e| e.to_str()) {
+        Some("html") => "text/html; charset=utf-8",
+        Some("css") => "text/css; charset=utf-8",
+        Some("js") | Some("mjs") => "application/javascript; charset=utf-8",
+        Some("wasm") => "application/wasm",
+        Some("json") | Some("webmanifest") => "application/json; charset=utf-8",
+        Some("png") => "image/png",
+        Some("ico") => "image/x-icon",
+        Some("svg") => "image/svg+xml",
+        Some("ttf") => "font/ttf",
+        Some("woff2") => "font/woff2",
+        _ => "application/octet-stream",
+    }
+}
+
+async fn serve_file_from_dir(dir: &StdPath, rel: &str) -> Response {
+    let target = dir.join(rel);
+    let Ok(bytes) = tokio::fs::read(&target).await else {
+        return (StatusCode::NOT_FOUND, "not found").into_response();
+    };
+    let mime = content_type_for_path(&target);
+    let mut response = (StatusCode::OK, bytes).into_response();
+    response
+        .headers_mut()
+        .insert(header::CONTENT_TYPE, HeaderValue::from_static(mime));
+    response
+}
+
+async fn serve_index(State(state): State<AppState>) -> Response {
+    serve_file_from_dir(&state.settings.web_dir, "index.html").await
+}
+
+fn serve_web_static(
+    filename: &'static str,
+) -> impl Fn(State<AppState>) -> std::pin::Pin<Box<dyn std::future::Future<Output = Response> + Send>>
++ Clone {
+    move |State(state): State<AppState>| {
+        Box::pin(async move { serve_file_from_dir(&state.settings.web_dir, filename).await })
+    }
+}
+
+async fn serve_icon_file(State(state): State<AppState>, Path(file): Path<String>) -> Response {
+    if !is_safe_filename(&file) {
+        return (StatusCode::FORBIDDEN, "forbidden").into_response();
+    }
+    serve_file_from_dir(&state.settings.web_dir.join("icons"), &file).await
+}
+
+async fn serve_wasm_file(State(state): State<AppState>, Path(file): Path<String>) -> Response {
+    if !is_safe_filename(&file) {
+        return (StatusCode::FORBIDDEN, "forbidden").into_response();
+    }
+    serve_file_from_dir(&state.settings.wasm_dir, &file).await
 }
 
 async fn security_headers(request: Request<Body>, next: Next) -> Response {

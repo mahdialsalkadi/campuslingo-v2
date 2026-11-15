@@ -1,0 +1,58 @@
+{
+  "course_id": "00000000-0000-4000-8000-000000000201",
+  "course_title": "Systems & Digital Logic Fortress",
+  "nodes": [
+    {"id": "n-arch-01", "title": "Core Pipeline Stages", "title_ar": "مراحل خط المعالجة الأساسي", "archetype": "PIPELINE", "tier": 2, "e_u_ticks": 7800, "is_brownout": false},
+    {"id": "n-volt-02", "title": "Voltage Regulator Tradeoff", "title_ar": "موازنة منظم الجهد", "archetype": "TRADEOFF", "tier": 1, "e_u_ticks": 6800, "is_brownout": true},
+    {"id": "n-cache-03", "title": "Spatial Locality Matrix", "title_ar": "مصفوفة الموضعية المكانية", "archetype": "SPATIAL", "tier": 2, "e_u_ticks": 8100, "is_brownout": false},
+    {"id": "n-sync-04", "title": "Memory Barrier Contrast", "title_ar": "مقارنة حواجز الذاكرة", "archetype": "CONTRAST", "tier": 1, "e_u_ticks": 7400, "is_brownout": false},
+    {"id": "n-hazard-05", "title": "Data Hazard Trap", "title_ar": "فخ مخاطر البيانات", "archetype": "TRAP", "tier": 1, "e_u_ticks": 6900, "is_brownout": true},
+    {"id": "n-axiom-06", "title": "Amdahl Speedup Axiom", "title_ar": "مسلمة تسريع أمدال", "archetype": "AXIOM", "tier": 3, "e_u_ticks": 8900, "is_brownout": false}
+  ],
+  "challenges": [
+    {
+      "id": "ch-pipe-01",
+      "node_id": "n-arch-01",
+      "prompt": "Compute effective throughput: W_eff = 1.25 * W_base at 60 ms period without V_max = 12.5 V saturation.",
+      "prompt_ar": "تعمل وحدة التحكم وفق المعادلة W_eff = 1.25 * W_base بفاصل 60 ms وحد أقصى 12.5 V دون فيض. ما السعة الفعالة عندما W_base = 80؟",
+      "options": ["100.0 req/s", "85.0 req/s", "125.0 req/s", "64.0 req/s"],
+      "options_ar": ["100.0 req/s (مئة وحدة)", "85.0 req/s (خمس وثمانون)", "125.0 req/s (مئة وخمس وعشرون)", "64.0 req/s (أربع وستون)"],
+      "correct_index": 0,
+      "sandbox_param": {"name": "W_base", "min": 40.0, "max": 120.0, "step": 5.0, "default": 80.0, "target_min": 95.0, "target_max": 110.0, "mult": 1.25}
+    },
+    {
+      "id": "ch-volt-02",
+      "node_id": "n-volt-02",
+      "prompt": "Brownout recovery: raise shield stability S_u above 50,000 ticks and clear E_u >= 7050 via spaced recall.",
+      "prompt_ar": "استعادة انخفاض الجهد: ارفع استقرار الدرع S_u فوق 50,000 وتجاوز عتبة E_u >= 7050 لحماية المدفع.",
+      "options": ["Good/Easy FSRS recall restores E_u >= 7050", "Wait 14 days idle", "Overload voltage above 15 V", "Disable forwarding path"],
+      "options_ar": ["استرجاع FSRS الصحيح يرفع E_u >= 7050", "انتظار 14 يوماً دون مراجعة", "تجاوز الجهد فوق 15 V", "تعطيل مسار التمرير الأمامي"],
+      "correct_index": 0,
+      "sandbox_param": {"name": "V_reg", "min": 3.0, "max": 15.0, "step": 0.5, "default": 7.5, "target_min": 10.5, "target_max": 12.5, "mult": 1.0}
+    },
+    {
+      "id": "ch-amdahl-03",
+      "node_id": "n-axiom-06",
+      "prompt": "With 75% parallelizable workload and 4 cores, what speedup does Amdahl's Law permit?",
+      "prompt_ar": "وفق قانون أمدال مع 75% عمل متوازٍ على 4 نوى، ما معامل التسريع الأقصى؟",
+      "options": ["2.29x (4 / (1 + 3*0.25))", "4.00x linear", "1.60x", "3.00x"],
+      "options_ar": ["2.29x (المعامل المحسوب)", "4.00x خطي كامل", "1.60x", "3.00x"],
+      "correct_index": 0,
+      "sandbox_param": {"name": "Cores", "min": 1.0, "max": 8.0, "step": 1.0, "default": 4.0, "target_min": 4.0, "target_max": 6.0, "mult": 1.0}
+    }
+  ],
+  "offline_raids": [
+    {"defender_user_id": "offline-def-01", "node_id": "n-arch-01", "node_title": "Shadow Bastion Alpha", "tier": 1, "e_u_ticks": 7200, "raid_immune": false, "has_revenge_window": false},
+    {"defender_user_id": "offline-def-02", "node_id": "n-volt-02", "node_title": "Brownout Citadel Beta", "tier": 2, "e_u_ticks": 6850, "raid_immune": false, "has_revenge_window": true}
+  ],
+  "offline_boss": {
+    "id": "00000000-0000-4000-8000-000000000501",
+    "title": "Warden of Stalled Pipelines",
+    "title_ar": "حارس خطوط المعالجة المتوقفة",
+    "mode": "LIVE_COOP",
+    "max_hp": 300,
+    "current_hp": 300,
+    "gold_reward": 240,
+    "status": "ACTIVE"
+  }
+}

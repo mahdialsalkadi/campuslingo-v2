@@ -21,7 +21,11 @@
     "m0:environment": "uv run python scripts/collect_environment.py",
     "m0:corpus": "uv run python scripts/select_corpus.py",
     "m0:audit": "uv run python scripts/audit_models.py",
-    "m0:parity": "npm run test:wasm"
+    "m0:parity": "npm run test:wasm",
+    "live:start": "node scripts/run_live_stack.mjs",
+    "verify:e2e": "node scripts/verify_full_stack_e2e.mjs",
+    "godot:live": "bash scripts/run_godot_game.sh",
+    "godot:test": "bash scripts/run_godot_game.sh --headless-test"
   },
   "devDependencies": {
     "@types/node": "22.19.11",

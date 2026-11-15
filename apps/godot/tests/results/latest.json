@@ -1,0 +1,12 @@
+{
+  "astar_short_wall_detour_cells": 8.82842707633972,
+  "breaker_wall_dps": 100,
+  "camera_zoom_default_m": 34,
+  "cannon_brownout_20s_dmg": 312,
+  "mortar_deadzone_cells": 4,
+  "mortar_shell_apex_m": 1.80413333333333,
+  "squire_accel_90pct_s": 0.483333333333333,
+  "squire_top_speed_mps": 2.7,
+  "tesla_reveal_radius_cells": 4,
+  "turn_rate_deg_per_s": 337.5
+}

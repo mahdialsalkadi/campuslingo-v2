@@ -1,0 +1,73 @@
+[gd_scene load_steps=6 format=3 uid="uid://m1combatlabscene"]
+
+[ext_resource type="Script" path="res://scripts/combat/combat_lab_scene.gd" id="1_lab"]
+[ext_resource type="PackedScene" path="res://scenes/village/IslandBoard.tscn" id="2_board"]
+[ext_resource type="Script" path="res://scripts/village/camera_pan_zoom.gd" id="3_cam"]
+[ext_resource type="Script" path="res://scripts/fx/combat_build_particles.gd" id="4_vfx"]
+[ext_resource type="Script" path="res://scripts/ui/section_debug_inspector.gd" id="5_insp"]
+
+[node name="CombatLab" type="Node3D"]
+script = ExtResource("1_lab")
+
+[node name="IslandBoard" parent="." instance=ExtResource("2_board")]
+
+[node name="CombatBuildParticles" type="Node3D" parent="."]
+script = ExtResource("4_vfx")
+
+[node name="WallPillarBatch" type="MultiMeshInstance3D" parent="."]
+
+[node name="WallConnectorBatch" type="MultiMeshInstance3D" parent="."]
+
+[node name="WallShadowBatch" type="MultiMeshInstance3D" parent="."]
+cast_shadow = 0
+
+[node name="Buildings" type="Node3D" parent="."]
+
+[node name="Troops" type="Node3D" parent="."]
+
+[node name="CameraPanZoom" type="Camera3D" parent="."]
+projection = 1
+current = true
+size = 34.0
+near = 0.5
+far = 240.0
+script = ExtResource("3_cam")
+
+[node name="StoryCam_A" type="Camera3D" parent="."]
+transform = Transform3D(0.74314, -0.44774, 0.49726, 0, 0.74314, 0.66913, -0.66913, -0.49726, 0.55226, 25.8576, 35.1948, 28.7177)
+projection = 1
+size = 34.0
+near = 0.5
+far = 240.0
+
+[node name="StoryCam_B" type="Camera3D" parent="."]
+transform = Transform3D(0.80902, -0.31148, 0.49847, 0, 0.84805, 0.52992, -0.58779, -0.42871, 0.68609, 18.0, 17.5, 25.5)
+projection = 1
+size = 13.5
+near = 0.5
+far = 240.0
+
+[node name="StoryCam_C" type="Camera3D" parent="."]
+transform = Transform3D(0.78801, 0.37904, -0.48515, 0, 0.78801, 0.61566, 0.61566, -0.48515, 0.62096, -16.5, 20.5, 25.5)
+projection = 1
+size = 16.0
+near = 0.5
+far = 240.0
+
+[node name="StoryCam_D" type="Camera3D" parent="."]
+transform = Transform3D(0.70711, -0.52548, 0.47315, 0, 0.66913, 0.74314, -0.70711, -0.52548, 0.47315, 30.2814, 47.5613, 30.2814)
+projection = 1
+size = 52.0
+near = 0.5
+far = 240.0
+
+[node name="HudCanvas" type="CanvasLayer" parent="."]
+
+[node name="SectionDebugInspector" type="Control" parent="HudCanvas"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("5_insp")

@@ -3,20 +3,34 @@
 New mobile-first learning strategy game. This is **not** an upgrade of
 `/home/mahdi/campus-lingo`; that project and its data remain read-only references.
 
-## Current stage: M2 ingestion (in progress)
+## Current stage: M0–M7 Complete (Full-Stack Playable; M8 Pilot Pending)
 
-This repository contains a Rust/WASM domain engine, an authenticated axum
-backend with PostgreSQL persistence, private asset delivery, durable jobs, a
-separate recovery-delivery worker, generated contracts, and offline evaluation
-tools. It does not yet contain a playable game: combat, matchmaking, Redis, AI
-workers, and the M5/M7 duel load gates remain open.
+This repository contains the Rust/WASM domain engine, authenticated axum
+backend with PostgreSQL 16 persistence, WebGL2/2D Strategy Shell (`packages/game-client`),
+live 2-lane WebSocket duels, M6 asynchronous raids/leagues/bosses/clans, M7 PWA/RTL
+hardening, generated contracts, and local ingestion/OCR/TTS pipelines. See
+[M0 status](docs/m0-status.md), [M1 status](docs/m1-status.md), [M2 status](docs/m2-status.md),
+[M3 status](docs/m3-status.md), [M4 status](docs/m4-status.md), [M5 status](docs/m5-status.md),
+[M6 status](docs/m6-status.md), and [M7 status](docs/m7-status.md) for milestone evidence
+and open M8 external signoffs (G-1 visual annotation and legal license reviews).
 
-Native/WASM tests use the explicitly user-approved f32-aware memory policy:
-`abs_error <= 1e-6 + 1e-6 * abs(reference)`. Discrete outcomes stay exact;
-absolute-only drift is preserved as a diagnostic. The seeded generation smoke
-probe passes; broader model/quality acceptance remains open. See [M0 status](docs/m0-status.md)
-and [M1 status](docs/m1-status.md). Current ingestion evidence and remaining
-work are tracked in [M2 status](docs/m2-status.md).
+## Live Playable Stack
+
+Start the full local PostgreSQL 16 + `campuslingo-server` stack (serving the WebGL2/2D
+game shell at `http://127.0.0.1:18080/` and WASM assets at `/wasm/*`) with seeded demo data:
+
+```sh
+npm run m0:build
+npm run live:start
+```
+
+Open explicit `http://127.0.0.1:18080/` (not `https://`, as local loopback dev serves plain HTTP unless terminated behind TLS).
+
+Run the automated full-stack headless Chromium E2E test against real Rust + PostgreSQL:
+
+```sh
+npm run verify:e2e
+```
 
 ## Runtime architecture
 
@@ -201,6 +215,12 @@ CAMPUSLINGO_ALLOWED_ORIGIN="https://campus.example" \
 Never publish this scaffold, raw inference/database/cache ports, the private
 asset directory, or recovery material to the internet. Combat, multiplayer,
 AI workers, and deployment hardening remain later gates.
+
+## Godot Village Clash & REA Evidence
+
+- **Godot 4.3 Client & Visual/Combat Docs:** [`apps/godot/`](apps/godot) (`./run_game.sh`, `npm run godot:live`, `npm run godot:test`), milestone progress & 4-lens critique logs in [`apps/godot/Docs/`](apps/godot/Docs).
+- **REA Reports, Plans & Captures:** [`docs/rea-reports/`](docs/rea-reports/README.md) — clean-room architecture plan (`coc_architecture_restart_plan.md`), phase plan (`citadel_clash_planning_phase.md`), visual showcase (`m1_visual_showcase.md`), screenshots, and JSON evidence exports (`coc_apk_evidence.json`, `coc_jadx_evidence.json`, `coc_evidence_bundle.json`, `evidence/steps/`). Raw third-party `.apk` and `.so` binaries are strictly excluded.
+- **Compiled Binaries (`x86_64` + Web):** Excluded from Git due to GitHub's 100 MiB file limit and published under **GitHub Releases** alongside [`apps/godot/builds/SHA256SUMS.txt`](apps/godot/builds/SHA256SUMS.txt).
 
 ## Evidence and privacy
 

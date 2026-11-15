@@ -1,0 +1,464 @@
+[gd_scene load_steps=7 format=3 uid="uid://campushudscene"]
+
+[ext_resource type="Script" path="res://scripts/ui/resource_top_bar.gd" id="1_top"]
+[ext_resource type="Script" path="res://scripts/ui/building_action_bar.gd" id="2_act"]
+[ext_resource type="Script" path="res://scripts/ui/study_flashcard_drawer.gd" id="3_study"]
+[ext_resource type="Script" path="res://scripts/ui/army_training_drawer.gd" id="4_army"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_bar"]
+bg_color = Color(0.11, 0.13, 0.17, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.76, 0.58, 0.28, 0.92)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 12.0
+content_margin_top = 8.0
+content_margin_right = 12.0
+content_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBox_modal"]
+bg_color = Color(0.09, 0.11, 0.15, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.84, 0.65, 0.30, 0.95)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+content_margin_left = 16.0
+content_margin_top = 14.0
+content_margin_right = 16.0
+content_margin_bottom = 14.0
+
+[node name="CampusHUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ResourceTopBar" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 14.0
+offset_top = 10.0
+offset_right = -14.0
+offset_bottom = 72.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBox_bar")
+script = ExtResource("1_top")
+
+[node name="HBox" type="HBoxContainer" parent="ResourceTopBar"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Counters" type="HBoxContainer" parent="ResourceTopBar/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="GoldLbl" type="Label" parent="ResourceTopBar/HBox/Counters"]
+layout_mode = 2
+text = "Gold: 1450"
+
+[node name="FocusLbl" type="Label" parent="ResourceTopBar/HBox/Counters"]
+layout_mode = 2
+text = "Focus: 620"
+
+[node name="TrophyLbl" type="Label" parent="ResourceTopBar/HBox/Counters"]
+layout_mode = 2
+text = "Trophies: 120"
+
+[node name="ShieldLbl" type="Label" parent="ResourceTopBar/HBox/Counters"]
+layout_mode = 2
+text = "Shield Active"
+
+[node name="ConnLbl" type="Label" parent="ResourceTopBar/HBox/Counters"]
+layout_mode = 2
+text = "LOCAL"
+
+[node name="NavBtns" type="HBoxContainer" parent="ResourceTopBar/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="VillageBtn" type="Button" parent="ResourceTopBar/HBox/NavBtns"]
+custom_minimum_size = Vector2(72, 44)
+layout_mode = 2
+text = "Village"
+
+[node name="EditBtn" type="Button" parent="ResourceTopBar/HBox/NavBtns"]
+custom_minimum_size = Vector2(64, 44)
+layout_mode = 2
+text = "Edit"
+
+[node name="StudyBtn" type="Button" parent="ResourceTopBar/HBox/NavBtns"]
+custom_minimum_size = Vector2(68, 44)
+layout_mode = 2
+text = "Study"
+
+[node name="RaidBtn" type="Button" parent="ResourceTopBar/HBox/NavBtns"]
+custom_minimum_size = Vector2(82, 44)
+layout_mode = 2
+text = "PvP Raid"
+
+[node name="BossBtn" type="Button" parent="ResourceTopBar/HBox/NavBtns"]
+custom_minimum_size = Vector2(64, 44)
+layout_mode = 2
+text = "Boss"
+
+[node name="DuelBtn" type="Button" parent="ResourceTopBar/HBox/NavBtns"]
+custom_minimum_size = Vector2(64, 44)
+layout_mode = 2
+text = "Duel"
+
+[node name="RightBtns" type="HBoxContainer" parent="ResourceTopBar/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ConnectBtn" type="Button" parent="ResourceTopBar/HBox/RightBtns"]
+custom_minimum_size = Vector2(64, 44)
+layout_mode = 2
+text = "Sync"
+
+[node name="LangBtn" type="Button" parent="ResourceTopBar/HBox/RightBtns"]
+custom_minimum_size = Vector2(96, 44)
+layout_mode = 2
+text = "EN | عربي"
+
+[node name="BuildingActionBar" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -310.0
+offset_top = -180.0
+offset_right = 310.0
+offset_bottom = -96.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBox_bar")
+script = ExtResource("2_act")
+
+[node name="VBox" type="VBoxContainer" parent="BuildingActionBar"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="InfoRow" type="HBoxContainer" parent="BuildingActionBar/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="SelTitleLbl" type="Label" parent="BuildingActionBar/VBox/InfoRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Core Archive (Lv2)"
+
+[node name="SelStatsLbl" type="Label" parent="BuildingActionBar/VBox/InfoRow"]
+layout_mode = 2
+text = "HP 2280/2280 | ACTIVE"
+
+[node name="BtnRow" type="HBoxContainer" parent="BuildingActionBar/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="InfoBtn" type="Button" parent="BuildingActionBar/VBox/BtnRow"]
+custom_minimum_size = Vector2(80, 44)
+layout_mode = 2
+text = "Info"
+
+[node name="UpgradeBtn" type="Button" parent="BuildingActionBar/VBox/BtnRow"]
+custom_minimum_size = Vector2(130, 44)
+layout_mode = 2
+text = "Upgrade"
+
+[node name="RepairBtn" type="Button" parent="BuildingActionBar/VBox/BtnRow"]
+custom_minimum_size = Vector2(124, 44)
+layout_mode = 2
+text = "Study Repair"
+
+[node name="MoveBtn" type="Button" parent="BuildingActionBar/VBox/BtnRow"]
+custom_minimum_size = Vector2(84, 44)
+layout_mode = 2
+text = "Move"
+
+[node name="CollectBtn" type="Button" parent="BuildingActionBar/VBox/BtnRow"]
+custom_minimum_size = Vector2(88, 44)
+layout_mode = 2
+text = "Collect"
+
+[node name="ArmyTrainingDrawer" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -630.0
+offset_top = -82.0
+offset_right = -14.0
+offset_bottom = -8.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBox_bar")
+script = ExtResource("4_army")
+
+[node name="VBox" type="VBoxContainer" parent="ArmyTrainingDrawer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TopRow" type="HBoxContainer" parent="ArmyTrainingDrawer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CapLbl" type="Label" parent="ArmyTrainingDrawer/VBox/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Train Camp (33/40):"
+
+[node name="RaidLbl" type="Label" parent="ArmyTrainingDrawer/VBox/TopRow"]
+visible = false
+layout_mode = 2
+text = "0* | 0% | 120s"
+
+[node name="RallyBtn" type="Button" parent="ArmyTrainingDrawer/VBox/TopRow"]
+visible = false
+custom_minimum_size = Vector2(86, 44)
+layout_mode = 2
+text = "Rally!"
+
+[node name="EndRaidBtn" type="Button" parent="ArmyTrainingDrawer/VBox/TopRow"]
+visible = false
+custom_minimum_size = Vector2(96, 44)
+layout_mode = 2
+text = "Finish Raid"
+
+[node name="UnitsRow" type="HBoxContainer" parent="ArmyTrainingDrawer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="SquireBtn" type="Button" parent="ArmyTrainingDrawer/VBox/UnitsRow"]
+custom_minimum_size = Vector2(90, 44)
+layout_mode = 2
+text = "Squire x8"
+
+[node name="ArcherBtn" type="Button" parent="ArmyTrainingDrawer/VBox/UnitsRow"]
+custom_minimum_size = Vector2(90, 44)
+layout_mode = 2
+text = "Archer x6"
+
+[node name="BreakerBtn" type="Button" parent="ArmyTrainingDrawer/VBox/UnitsRow"]
+custom_minimum_size = Vector2(96, 44)
+layout_mode = 2
+text = "Breaker x3"
+
+[node name="GiantBtn" type="Button" parent="ArmyTrainingDrawer/VBox/UnitsRow"]
+custom_minimum_size = Vector2(86, 44)
+layout_mode = 2
+text = "Giant x2"
+
+[node name="DrakeBtn" type="Button" parent="ArmyTrainingDrawer/VBox/UnitsRow"]
+custom_minimum_size = Vector2(86, 44)
+layout_mode = 2
+text = "Drake x1"
+
+[node name="HeroBtn" type="Button" parent="ArmyTrainingDrawer/VBox/UnitsRow"]
+custom_minimum_size = Vector2(82, 44)
+layout_mode = 2
+text = "Hero x1"
+
+[node name="StudyFlashcardDrawer" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -540.0
+offset_top = -250.0
+offset_right = -18.0
+offset_bottom = 220.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_modal")
+script = ExtResource("3_study")
+
+[node name="VBox" type="VBoxContainer" parent="StudyFlashcardDrawer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TopRow" type="HBoxContainer" parent="StudyFlashcardDrawer/VBox"]
+layout_mode = 2
+
+[node name="StudyHeaderLbl" type="Label" parent="StudyFlashcardDrawer/VBox/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "FSRS-6 Recall & Sandbox Lab"
+
+[node name="CloseStudyBtn" type="Button" parent="StudyFlashcardDrawer/VBox/TopRow"]
+custom_minimum_size = Vector2(72, 44)
+layout_mode = 2
+text = "Close"
+
+[node name="NodeBadgeLbl" type="Label" parent="StudyFlashcardDrawer/VBox"]
+layout_mode = 2
+text = "Target Node: Pipeline"
+
+[node name="PromptLbl" type="Label" parent="StudyFlashcardDrawer/VBox"]
+layout_mode = 2
+text = "Solve the recall drill."
+autowrap_mode = 3
+
+[node name="OptionsGrid" type="GridContainer" parent="StudyFlashcardDrawer/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+columns = 2
+
+[node name="Opt0Btn" type="Button" parent="StudyFlashcardDrawer/VBox/OptionsGrid"]
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Opt A"
+
+[node name="Opt1Btn" type="Button" parent="StudyFlashcardDrawer/VBox/OptionsGrid"]
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Opt B"
+
+[node name="Opt2Btn" type="Button" parent="StudyFlashcardDrawer/VBox/OptionsGrid"]
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Opt C"
+
+[node name="Opt3Btn" type="Button" parent="StudyFlashcardDrawer/VBox/OptionsGrid"]
+custom_minimum_size = Vector2(220, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Opt D"
+
+[node name="SandboxBox" type="VBoxContainer" parent="StudyFlashcardDrawer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SandboxValLbl" type="Label" parent="StudyFlashcardDrawer/VBox/SandboxBox"]
+layout_mode = 2
+text = "W_base=80.0 -> Eff=100.0"
+
+[node name="SandboxSlider" type="HSlider" parent="StudyFlashcardDrawer/VBox/SandboxBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+min_value = 40.0
+max_value = 120.0
+value = 80.0
+
+[node name="ControlsRow" type="HBoxContainer" parent="StudyFlashcardDrawer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Rate1Btn" type="Button" parent="StudyFlashcardDrawer/VBox/ControlsRow"]
+custom_minimum_size = Vector2(68, 44)
+layout_mode = 2
+text = "1 Again"
+
+[node name="Rate2Btn" type="Button" parent="StudyFlashcardDrawer/VBox/ControlsRow"]
+custom_minimum_size = Vector2(64, 44)
+layout_mode = 2
+text = "2 Hard"
+
+[node name="Rate3Btn" type="Button" parent="StudyFlashcardDrawer/VBox/ControlsRow"]
+custom_minimum_size = Vector2(68, 44)
+layout_mode = 2
+text = "3 Good"
+
+[node name="Rate4Btn" type="Button" parent="StudyFlashcardDrawer/VBox/ControlsRow"]
+custom_minimum_size = Vector2(64, 44)
+layout_mode = 2
+text = "4 Easy"
+
+[node name="OverchargeBtn" type="CheckButton" parent="StudyFlashcardDrawer/VBox/ControlsRow"]
+custom_minimum_size = Vector2(130, 44)
+layout_mode = 2
+text = "Overcharge"
+
+[node name="SubmitStudyBtn" type="Button" parent="StudyFlashcardDrawer/VBox"]
+custom_minimum_size = Vector2(180, 44)
+layout_mode = 2
+text = "Submit Recall & Rating"
+
+[node name="FeedbackLbl" type="Label" parent="StudyFlashcardDrawer/VBox"]
+layout_mode = 2
+text = ""
+
+[node name="ModeModalDrawer" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 18.0
+offset_top = -120.0
+offset_right = 438.0
+offset_bottom = 90.0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBox_modal")
+
+[node name="VBox" type="VBoxContainer" parent="ModeModalDrawer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TopRow" type="HBoxContainer" parent="ModeModalDrawer/VBox"]
+layout_mode = 2
+
+[node name="ModeTitleLbl" type="Label" parent="ModeModalDrawer/VBox/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Mode Arena"
+
+[node name="CloseModeBtn" type="Button" parent="ModeModalDrawer/VBox/TopRow"]
+custom_minimum_size = Vector2(72, 44)
+layout_mode = 2
+text = "Close"
+
+[node name="ModeStatusLbl" type="Label" parent="ModeModalDrawer/VBox"]
+layout_mode = 2
+text = "Ready"
+autowrap_mode = 3
+
+[node name="Btns" type="HBoxContainer" parent="ModeModalDrawer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Action1Btn" type="Button" parent="ModeModalDrawer/VBox/Btns"]
+custom_minimum_size = Vector2(115, 44)
+layout_mode = 2
+text = "Action 1"
+
+[node name="Action2Btn" type="Button" parent="ModeModalDrawer/VBox/Btns"]
+custom_minimum_size = Vector2(115, 44)
+layout_mode = 2
+text = "Action 2"
+
+[node name="Action3Btn" type="Button" parent="ModeModalDrawer/VBox/Btns"]
+custom_minimum_size = Vector2(115, 44)
+layout_mode = 2
+text = "Action 3"
+
+[node name="ModeLogLbl" type="Label" parent="ModeModalDrawer/VBox"]
+layout_mode = 2
+text = ""
+autowrap_mode = 3

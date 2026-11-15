@@ -1,0 +1,19 @@
+{
+  "projectiles": {
+    "arrow": "res://assets/models/projectiles/arrow_bolt_lod0.glb",
+    "cannonball": "res://assets/models/projectiles/cannonball_lod0.glb",
+    "mortar": "res://assets/models/projectiles/mortar_shell_lod0.glb"
+  },
+  "events": {
+    "mortar_impact": {"ring": [3.6, "#FF8F2E", 0.42], "halo": [2.4, "#FF9E38", 1.4, 0.28], "puffs": ["#8A7A66", 5, 2.2]},
+    "cannon_fire": {"halo": [1.35, "#FFC757", 1.3, 0.16], "puffs": ["#D6CCBD", 3, 1.1]},
+    "destroy": {"ring": [4.0, "#FF6B2E", 0.48], "puffs": ["#9E8C73", 6, 2.5]},
+    "wall_breach": {"ring": [3.4, "#FF7A33", 0.44], "puffs": ["#9E8C73", 5, 2.2]},
+    "upgrade": {"ring": [3.4, "#FFDB47", 0.52], "halo": [2.8, "#FFE057", 1.4, 0.38]},
+    "star": {"ring": [3.6, "#FFDB47", 0.52], "halo": [2.8, "#FFE057", 1.4, 0.38]},
+    "troop_deploy": {"ring": [1.6, "#52DBFF", 0.32]},
+    "rally": {"ring": [7.5, "#FFC73D", 0.60], "halo": [3.4, "#FFD147", 1.3, 0.45]},
+    "brownout": {"puffs": ["#47474D", 2, 0.65]},
+    "hit": {"puffs": ["#EBDBB8", 2, 0.95]}
+  }
+}

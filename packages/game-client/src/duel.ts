@@ -1,3 +1,8 @@
+import {
+  connectDuelWebSocket,
+  matchmakeDuel,
+  type DuelSocketConnection,
+} from './api.js';
 import type { EvaluateJsonFn } from './controller.js';
 
 export const TOAST_MAX_DURATION_MS = 2500;
@@ -189,6 +194,8 @@ export function formatDuelClock(remainingMs: number): string {
 }
 
 export interface DuelPanelController {
+  setLiveCourse(courseId: string | null): void;
+  startLiveMatch(): Promise<void>;
   updateProjection(next: LiveDuelArenaProjection): void;
   getProjection(): LiveDuelArenaProjection;
   getToastState(): HudToastState;
@@ -201,6 +208,14 @@ export function mountDuelArenaPanel(
 ): DuelPanelController {
   let state = createInitialDuelProjection('GHOST');
   let activeLane: 0 | 1 = 0;
+  let liveCourseId: string | null = null;
+  let liveMatchId: string | null = null;
+  let liveSocket: DuelSocketConnection | null = null;
+  let clientSeq = 0;
+  const nextClientSeq = () => {
+    clientSeq += 1;
+    return clientSeq;
+  };
 
   container.innerHTML = `
     <div class="m5-duel-panel" data-testid="m5-duel-panel">
@@ -225,6 +240,7 @@ export function mountDuelArenaPanel(
       <div class="m5-hand-row" id="m5-hand-row" data-testid="m5-hand-row"></div>
 
       <div class="m5-duel-actions">
+        <button type="button" class="touch-btn" id="m5-live-matchmake" data-testid="m5-live-matchmake">Live WS Matchmake</button>
         <button type="button" class="touch-btn accent-btn" id="m5-strike-overcharge" data-testid="m5-strike-overcharge">Strike 2.0x Overcharge</button>
         <button type="button" class="touch-btn" id="m5-advance-30s" data-testid="m5-advance-30s">+30s Final 2x Phase</button>
         <button type="button" class="touch-btn" id="m5-toast-demo" data-testid="m5-toast-demo">Show &lt;=2.5s HUD Toast</button>
@@ -240,6 +256,7 @@ export function mountDuelArenaPanel(
   const energyReadoutEl = container.querySelector('#m5-energy-readout') as HTMLElement;
   const statusReadoutEl = container.querySelector('#m5-status-readout') as HTMLElement;
   const handRowEl = container.querySelector('#m5-hand-row') as HTMLElement;
+  const liveMatchBtn = container.querySelector('#m5-live-matchmake') as HTMLButtonElement;
   const strikeBtn = container.querySelector('#m5-strike-overcharge') as HTMLButtonElement;
   const advanceBtn = container.querySelector('#m5-advance-30s') as HTMLButtonElement;
   const toastDemoBtn = container.querySelector('#m5-toast-demo') as HTMLButtonElement;
@@ -293,6 +310,13 @@ export function mountDuelArenaPanel(
             ...state,
             self: { ...state.self, selected_card_id: card.card_id },
           };
+          if (liveSocket?.isOpen()) {
+            liveSocket.send({
+              type: 'SELECT_CARD',
+              sequence: nextClientSeq(),
+              card_id: card.card_id,
+            });
+          }
           render();
         });
         return btn;
@@ -300,12 +324,112 @@ export function mountDuelArenaPanel(
     );
   };
 
+  const startLiveMatch = async () => {
+    if (!liveCourseId) {
+      toast.show('Connect to live server first', 'warn', 2000);
+      return;
+    }
+    try {
+      liveMatchBtn.textContent = 'Matching...';
+      const resp = await matchmakeDuel(liveCourseId);
+      liveSocket?.close();
+      liveMatchId = resp.match_id;
+      state = resp.arena;
+      clientSeq = state.self.last_sequence ?? 0;
+      render();
+
+      liveSocket = connectDuelWebSocket(resp.match_id, {
+        onOpen: () => {
+          liveSocket?.send({
+            type: 'START_ROUND',
+            sequence: nextClientSeq(),
+          });
+          toast.show(
+            `Live WS match ready (${resp.opponent_kind})`,
+            'info',
+            2200,
+          );
+        },
+        onFrame: frame => {
+          if (
+            (frame.type === 'MATCH_STATE' || frame.type === 'SNAPSHOT_RESYNC') &&
+            frame.payload
+          ) {
+            state = frame.payload as LiveDuelArenaProjection;
+            render();
+          } else if (frame.type === 'STRIKE_RESOLVED' && frame.payload) {
+            const payload = frame.payload as {
+              strike?: {
+                result?: { damage_to_tower?: number; overcharged?: boolean };
+              };
+              arena?: LiveDuelArenaProjection;
+            };
+            if (payload.arena) {
+              state = payload.arena;
+            }
+            const dmg = payload.strike?.result?.damage_to_tower ?? 0;
+            const overcharged = Boolean(payload.strike?.result?.overcharged);
+            toast.show(
+              overcharged
+                ? `WS Overcharge! -${dmg} Tower HP`
+                : `WS Strike: -${dmg} Tower HP`,
+              overcharged ? 'overcharge' : 'info',
+              2200,
+            );
+            render();
+          } else if (frame.type === 'ERROR') {
+            const errPayload = frame as { code?: string };
+            toast.show(`WS Error: ${errPayload.code ?? 'UNKNOWN'}`, 'warn', 2200);
+          }
+        },
+        onClose: () => {
+          if (liveMatchId === resp.match_id) {
+            liveMatchBtn.textContent = 'Live WS Matchmake';
+          }
+        },
+      });
+      liveMatchBtn.textContent = 'Rematch WS';
+    } catch (err) {
+      liveMatchBtn.textContent = 'Live WS Matchmake';
+      toast.show(
+        err instanceof Error ? err.message : 'Live matchmake failed',
+        'warn',
+        2200,
+      );
+    }
+  };
+
+  liveMatchBtn.addEventListener('click', () => {
+    void startLiveMatch();
+  });
+
   strikeBtn.addEventListener('click', () => {
     const cards = state.self.hand ?? [];
     const chosen =
       cards.find(c => c.card_id === state.self.selected_card_id) ?? cards[0];
     if (!chosen) return;
     const nextSeq = (state.self.last_sequence ?? 0) + 1;
+
+    if (liveMatchId && liveSocket?.isOpen()) {
+      const seq = Math.max(nextSeq, nextClientSeq());
+      clientSeq = seq;
+      liveSocket.send({ type: 'START_ROUND', sequence: seq });
+      liveSocket.send({
+        type: 'SELECT_CARD',
+        sequence: seq,
+        card_id: chosen.card_id,
+      });
+      liveSocket.send({
+        type: 'STRIKE',
+        sequence: seq,
+        lane: activeLane,
+        card_id: chosen.card_id,
+        selected_index: 0,
+        use_quick_blitz_chain: false,
+        client_elapsed_ms: Math.max(400, Math.floor(chosen.base_window_ms * 0.4)),
+      });
+      return;
+    }
     const fullArenaReq = {
       kind: 'duel_strike',
       arena: {
@@ -415,6 +539,10 @@ export function mountDuelArenaPanel(
   });
 
   advanceBtn.addEventListener('click', () => {
+    if (liveMatchId && liveSocket?.isOpen()) {
+      liveSocket.send({ type: 'TICK_ADVANCE', delta_ms: 30_000 });
+      return;
+    }
     const nextClock = Math.min(DUEL_DURATION_MS, state.match_clock_ms + 30_000);
     const remaining = Math.max(0, DUEL_DURATION_MS - nextClock);
     const doubleEnergy = nextClock >= 60_000;
@@ -441,6 +569,16 @@ export function mountDuelArenaPanel(
   render();
 
   return {
+    setLiveCourse(courseId) {
+      if (liveCourseId !== courseId) {
+        liveSocket?.close();
+        liveSocket = null;
+        liveMatchId = null;
+        liveMatchBtn.textContent = 'Live WS Matchmake';
+      }
+      liveCourseId = courseId;
+    },
+    startLiveMatch,
     updateProjection(next) {
       state = next;
       render();
@@ -452,6 +590,8 @@ export function mountDuelArenaPanel(
       return toast.getState();
     },
     destroy() {
+      liveSocket?.close();
+      liveSocket = null;
       toast.dismiss();
       container.replaceChildren();
     },

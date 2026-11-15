@@ -110,6 +110,8 @@ impl TestApp {
             allowed_origin: None,
             recovery_key: Some(recovery_key.clone()),
             asset_dir: asset_dir.clone(),
+            web_dir: PathBuf::from("packages/game-client/public"),
+            wasm_dir: PathBuf::from("packages/engine/generated"),
         };
         let state = AppState {
             auth_pool: auth_pool.clone(),

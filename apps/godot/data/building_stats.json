@@ -1,0 +1,74 @@
+{
+  "buildings": {
+    "quill_archer_spire": {
+      "kind": "DEFENSE", "size": 3, "base_hp": 400, "dps": [18, 23, 28, 34],
+      "shot_interval": 0.70, "range_min": 0.0, "range_max": 9.0,
+      "targets_ground": true, "targets_air": true, "splash_radius": 0.0,
+      "projectile": "arrow", "target_h": 3.55, "max_xz": 3.2,
+      "base_model": "res://assets/models/defenses/quill_archer_spire",
+      "turret_model": "res://assets/models/defenses/quill_archer_turret",
+      "turret_y": 2.96, "turret_h": 0.92, "muzzle_y": 3.30
+    },
+    "ink_cannon": {
+      "kind": "DEFENSE", "size": 3, "base_hp": 460, "dps": [24, 30, 37, 45],
+      "shot_interval": 0.80, "range_min": 0.0, "range_max": 8.0,
+      "targets_ground": true, "targets_air": false, "splash_radius": 0.0,
+      "projectile": "cannonball", "target_h": 0.52, "max_xz": 3.2,
+      "base_model": "res://assets/models/defenses/ink_cannon_base",
+      "turret_model": "res://assets/models/defenses/ink_cannon_turret",
+      "turret_y": 0.36, "turret_h": 1.18, "muzzle_y": 1.12
+    },
+    "rune_mortar": {
+      "kind": "DEFENSE", "size": 3, "base_hp": 420, "dps": [20, 26, 32, 38],
+      "shot_interval": 3.50, "range_min": 4.0, "range_max": 11.0,
+      "targets_ground": true, "targets_air": false, "splash_radius": 2.0,
+      "projectile": "mortar", "target_h": 0.68, "max_xz": 3.3,
+      "base_model": "res://assets/models/defenses/rune_mortar_base",
+      "turret_model": "res://assets/models/defenses/rune_mortar_tube",
+      "turret_y": 0.56, "turret_h": 1.25, "muzzle_y": 1.55
+    },
+    "hidden_proctor_tesla": {
+      "kind": "DEFENSE", "size": 2, "base_hp": 320, "dps": [32, 40, 49, 58],
+      "shot_interval": 0.60, "range_min": 0.0, "range_max": 6.5,
+      "targets_ground": true, "targets_air": true, "splash_radius": 0.0,
+      "stealth_reveal_radius": 4.0, "projectile": "tesla", "target_h": 2.55, "max_xz": 2.1,
+      "base_model": "res://assets/models/defenses/hidden_proctor_trapdoor",
+      "spire_model": "res://assets/models/defenses/hidden_proctor_tesla",
+      "muzzle_y": 2.55
+    },
+    "core_archive_townhall": {
+      "kind": "TOWNHALL", "size": 4, "base_hp": 1200, "target_h": 4.2, "max_xz": 5.2,
+      "upgrade_cost_gold": [0, 400, 900, 1600],
+      "model_lv": [
+        "res://assets/models/buildings/core_archive_townhall_lv0",
+        "res://assets/models/buildings/core_archive_townhall_lv1",
+        "res://assets/models/buildings/core_archive_townhall_lv2",
+        "res://assets/models/buildings/core_archive_townhall_lv3"
+      ]
+    },
+    "gold_mine_vault": {
+      "kind": "RESOURCE", "size": 3, "base_hp": 450, "target_h": 2.6, "max_xz": 3.6,
+      "upgrade_cost_gold": [0, 180, 420, 820],
+      "model": "res://assets/models/buildings/gold_mine_vault"
+    },
+    "focus_extractor_tank": {
+      "kind": "RESOURCE", "size": 3, "base_hp": 450, "target_h": 2.8, "max_xz": 3.5,
+      "upgrade_cost_gold": [0, 180, 420, 820],
+      "model": "res://assets/models/buildings/focus_extractor_tank"
+    },
+    "study_barracks_camp": {
+      "kind": "ARMY", "size": 3, "base_hp": 500, "target_h": 2.6, "max_xz": 3.6,
+      "housing_by_tier": [20, 40, 60, 80], "upgrade_cost_gold": [0, 220, 480, 900],
+      "model": "res://assets/models/buildings/study_barracks_camp"
+    },
+    "clan_hall_shield_dome": {
+      "kind": "SHIELD", "size": 3, "base_hp": 500, "target_h": 3.1, "max_xz": 3.6,
+      "upgrade_cost_gold": [0, 250, 550, 1000],
+      "model": "res://assets/models/buildings/clan_hall_shield_dome"
+    },
+    "fortress_wall_tile": {
+      "kind": "WALL", "size": 1, "base_hp": 300, "hp_by_tier": [300, 480, 680, 900],
+      "target_h": 1.45, "max_xz": 1.2, "upgrade_cost_gold": [0, 40, 100, 200]
+    }
+  }
+}

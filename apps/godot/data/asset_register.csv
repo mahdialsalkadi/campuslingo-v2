@@ -1,0 +1,163 @@
+local_path,pack,license,bytes,sha256_16,source_url,magic_verified
+assets/audio/sfx_archer.ogg,Kenney - Starter-Kit-FPS Audio,CC0-1.0 / MIT,8989,fdbd0e559acd5c01,https://raw.githubusercontent.com/KenneyNL/Starter-Kit-FPS/main/sounds/enemy_attack.ogg,True
+assets/audio/sfx_cannon.ogg,Kenney - Starter-Kit-FPS Audio,CC0-1.0 / MIT,14032,9ddb14d878e6af60,https://raw.githubusercontent.com/KenneyNL/Starter-Kit-FPS/main/sounds/blaster.ogg,True
+assets/audio/sfx_deploy.ogg,Kenney - Starter-Kit-3D-Platformer Audio,CC0-1.0 / MIT,5805,f090c16689e9ec04,https://raw.githubusercontent.com/KenneyNL/Starter-Kit-3D-Platformer/main/sounds/jump.ogg,True
+assets/audio/sfx_destroy.ogg,Kenney - Starter-Kit-FPS Audio,CC0-1.0 / MIT,17737,3205e84c18ab40ea,https://raw.githubusercontent.com/KenneyNL/Starter-Kit-FPS/main/sounds/enemy_destroy.ogg,True
+assets/audio/sfx_hit.ogg,Kenney - Starter-Kit-FPS Audio,CC0-1.0 / MIT,6135,59e4ed89a582a03e,https://raw.githubusercontent.com/KenneyNL/Starter-Kit-FPS/main/sounds/enemy_hurt.ogg,True
+assets/audio/sfx_mortar_break.ogg,Kenney - Starter-Kit-3D-Platformer Audio,CC0-1.0 / MIT,10784,51157b7441fca84f,https://raw.githubusercontent.com/KenneyNL/Starter-Kit-3D-Platformer/main/sounds/break.ogg,True
+assets/audio/sfx_star.ogg,Kenney - Starter-Kit-3D-Platformer Audio,CC0-1.0 / MIT,6620,df55e931e6b78e5a,https://raw.githubusercontent.com/KenneyNL/Starter-Kit-3D-Platformer/main/sounds/coin.ogg,True
+assets/fonts/NotoNaskhArabic-Bold.ttf,Google Fonts - Noto Naskh Arabic (local OFL-1.1),OFL-1.1,279468,04017b0ccdd1156d,file:///usr/share/fonts/noto/NotoNaskhArabic-Bold.ttf,True
+assets/fonts/NotoNaskhArabic-Regular.ttf,Google Fonts - Noto Naskh Arabic (local OFL-1.1),OFL-1.1,247336,6f0a92031367b2f5,file:///usr/share/fonts/noto/NotoNaskhArabic-Regular.ttf,True
+assets/fonts/NotoSans-Bold.ttf,Google Fonts - Noto Sans (local OFL-1.1),OFL-1.1,631484,1df075a380fc7cb8,file:///usr/share/fonts/noto/NotoSans-Bold.ttf,True
+assets/fonts/NotoSans-Regular.ttf,Google Fonts - Noto Sans (local OFL-1.1),OFL-1.1,621572,478c558ea716033c,file:///usr/share/fonts/noto/NotoSans-Regular.ttf,True
+assets/models/buildings/clan_hall_shield_dome_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,145604,676891ca58d2b399,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/clan_hall_shield_dome_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,78920,f60cb27e5c128559,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/clan_hall_shield_dome_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,41904,2ee87b1c8dfac97d,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv0_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,153728,585b8db7f7edb456,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv0_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,77552,38ca05b48caf7ae7,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv0_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,40904,f949eb6f6783c00a,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv1_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,225808,4ab2cc5c7fb22394,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv1_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,111236,0c31e74aa5f39452,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv1_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,57728,14fbe4b3c6b4889e,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv2_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,244588,8ec5f41fb22e128c,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv2_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,123200,4e07ab758f8d5ed2,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv2_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,63064,251a93c2d2f453e0,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv3_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,254588,859afc389aa9c0ce,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv3_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,130172,58cc36ca59ca3e91,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/core_archive_townhall_lv3_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,67152,b0cebade7f885fab,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/focus_extractor_tank_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,90744,9881a3bcabeae830,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/focus_extractor_tank_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,53268,12ce692c37e4c413,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/focus_extractor_tank_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,31572,e85f9c169e00c18c,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/gold_mine_vault_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,128272,007da939769856de,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/gold_mine_vault_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,63480,fb5f58cb3c5615aa,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/gold_mine_vault_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,34620,ce139d83f5a409ed,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/study_barracks_camp_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,114984,6f85dec2d7ffc160,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/study_barracks_camp_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,62996,b0b743486ee66006,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/study_barracks_camp_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,35220,35b3dd43a2411dfc,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv0_connector_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,25212,47721490f938a607,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv0_connector_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,13784,fde0bde609fa937e,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv0_connector_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,8396,bb5b15cad798b972,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv0_pillar_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,24724,ca239421f02e47d0,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv0_pillar_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,13676,e10aafe2b4a981a7,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv0_pillar_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,8516,4070ca14d3b5ac95,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv1_connector_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,32328,2e9143dea3ed06a9,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv1_connector_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,16760,44b0a7417763653f,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv1_connector_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,9904,29309b362f86f215,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv1_pillar_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,23980,983ff30e9d182bba,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv1_pillar_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,12456,89a6a51054ceda3a,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv1_pillar_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,7488,e1052171b67d29df,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv2_connector_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,32340,185486a5e54edba7,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv2_connector_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,16744,16fad37fa54aba62,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv2_connector_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,10120,0f862bfa18c832a0,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv2_pillar_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,30128,a2866fc0a82d8deb,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv2_pillar_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,18752,b2e998d66555370d,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv2_pillar_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,11740,1d02fa8d6e305d6e,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv3_connector_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,33600,3ce65fe4414d1945,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv3_connector_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,17796,cad994944d562b2d,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv3_connector_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,10968,e655b0fd679390fa,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv3_pillar_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,37224,1edb6d104f28dae0,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv3_pillar_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,21556,5128a785422adb3c,local://tools/blender_build_m1_models.py,True
+assets/models/buildings/wall_lv3_pillar_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,13228,ad7362c130acede2,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/hidden_proctor_tesla_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,151012,f6e8a653ae2af39b,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/hidden_proctor_tesla_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,80340,7f56aa63432c9934,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/hidden_proctor_tesla_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,44640,ed79b8e6f0adb0de,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/hidden_proctor_trapdoor_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,45980,81e5a3f2972ab0cb,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/hidden_proctor_trapdoor_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,24008,6f94140a682fffe6,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/hidden_proctor_trapdoor_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,13472,62668e25153cbdf6,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/ink_cannon_base_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,83080,b14cf6d158512d42,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/ink_cannon_base_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,47356,ff0ad8bffabe2ced,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/ink_cannon_base_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,24048,508997d5dee5d61a,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/ink_cannon_turret_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,178784,0c834a738632174b,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/ink_cannon_turret_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,91788,956a65532ee44737,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/ink_cannon_turret_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,48628,1b65f39199de9b08,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/quill_archer_spire_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,283244,2ddf5061ee7c9640,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/quill_archer_spire_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,141876,e40ac9844a6ed075,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/quill_archer_spire_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,75052,b523c829a432bca3,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/quill_archer_turret_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,74188,593bcb9034f76416,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/quill_archer_turret_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,41976,fc9e01d6b7b9d67a,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/quill_archer_turret_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,26000,5bebe5525a96c546,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/rune_mortar_base_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,89744,754ddbef2596d363,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/rune_mortar_base_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,45608,61dfa6aaf26e523d,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/rune_mortar_base_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,23572,f441b09b2333cafc,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/rune_mortar_tube_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,81576,3ede2e92eaf2ea5c,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/rune_mortar_tube_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,42976,a74bdf6926c558d8,local://tools/blender_build_m1_models.py,True
+assets/models/defenses/rune_mortar_tube_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,25852,229eb216d98b4d6d,local://tools/blender_build_m1_models.py,True
+assets/models/m0_bench/arcane_pylon_lod0.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,121472,886701f2339858ba,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/arcane_pylon_lod1.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,73652,eb568816f0793e42,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/arcane_pylon_lod2.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,43952,c49051d80d79fafc,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/citadel_plinth_lod0.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,269104,0d751e0ffb114a1a,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/citadel_plinth_lod1.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,141436,cbebe5f1a110e9cf,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/citadel_plinth_lod2.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,72308,4fe8fb67c7ca03bf,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/cliff_boulder_lod0.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,43288,3985747a5a114f1d,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/cliff_boulder_lod1.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,20344,4e0c2f6e7c80c528,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/cliff_boulder_lod2.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,10596,7549a60f9a80ffd8,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/cliff_segment_lod0.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,43288,19097cf1c0867387,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/cliff_segment_lod1.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,20172,d3ba1a3e70ff849c,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/cliff_segment_lod2.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,10596,f9ebc6824c0a9748,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/elixir_vat_lod0.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,144728,9c7d7ebae9782d30,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/elixir_vat_lod1.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,76600,b3dfe2753d25cafb,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/elixir_vat_lod2.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,38936,a3e669c52b6bfb8f,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/pine_cluster_lod0.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,46600,cac246d96056c815,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/pine_cluster_lod1.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,28028,86529e9b0ec789ab,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/pine_cluster_lod2.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,14460,3e1acaae3116a982,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/wall_connector_lod0.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,59392,468091c3daaa0e00,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/wall_connector_lod1.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,28568,7d43f0649260183b,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/wall_connector_lod2.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,15192,becc51574b1b27df,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/wall_pillar_lod0.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,64780,1daba1e79083226a,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/wall_pillar_lod1.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,33280,64f9c2e110b542e1,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/wall_pillar_lod2.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,18296,83972f87e974c631,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/watch_tower_lod0.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,285612,fd943758ad19afe8,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/watch_tower_lod1.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,146796,b93433f5b0afa934,local://tools/blender_build_m0_diorama.py,True
+assets/models/m0_bench/watch_tower_lod2.glb,Blender 5.3.0 Clean-Room M0 Architecture,CC0-1.0,77476,d2a56d9726b22b0c,local://tools/blender_build_m0_diorama.py,True
+assets/models/projectiles/arrow_bolt_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,21600,2beeeea68a285379,local://tools/blender_build_m1_models.py,True
+assets/models/projectiles/cannonball_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,27856,fee8e5d9f8675278,local://tools/blender_build_m1_models.py,True
+assets/models/projectiles/mortar_shell_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,28200,24a0bd46815be17c,local://tools/blender_build_m1_models.py,True
+assets/models/troops/field_scholar_hero_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,114848,ba970d870ff3c419,local://tools/blender_build_m1_models.py,True
+assets/models/troops/field_scholar_hero_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,63412,5f62683fd683b032,local://tools/blender_build_m1_models.py,True
+assets/models/troops/field_scholar_hero_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,35392,adbff1e563222a60,local://tools/blender_build_m1_models.py,True
+assets/models/troops/formula_giant_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,128468,59c564dfef9011aa,local://tools/blender_build_m1_models.py,True
+assets/models/troops/formula_giant_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,64344,c543fb791aa7c633,local://tools/blender_build_m1_models.py,True
+assets/models/troops/formula_giant_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,36880,c0aa1cde26460566,local://tools/blender_build_m1_models.py,True
+assets/models/troops/glyph_drake_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,68360,7dad5c905fc5dc9a,local://tools/blender_build_m1_models.py,True
+assets/models/troops/glyph_drake_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,39168,dafa919b3d3991ed,local://tools/blender_build_m1_models.py,True
+assets/models/troops/glyph_drake_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,22728,f8a7d108eae14827,local://tools/blender_build_m1_models.py,True
+assets/models/troops/lexi_archer_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,100604,64a84f19cb765540,local://tools/blender_build_m1_models.py,True
+assets/models/troops/lexi_archer_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,58828,a8ee72d1884a1b5f,local://tools/blender_build_m1_models.py,True
+assets/models/troops/lexi_archer_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,33452,c2298134eb8fe125,local://tools/blender_build_m1_models.py,True
+assets/models/troops/squire_footman_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,130852,b3ff9e6beda6f8dc,local://tools/blender_build_m1_models.py,True
+assets/models/troops/squire_footman_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,69560,b78d06d93bd6b474,local://tools/blender_build_m1_models.py,True
+assets/models/troops/squire_footman_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,40164,eb42181b6897eefa,local://tools/blender_build_m1_models.py,True
+assets/models/troops/thesis_breaker_lod0.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,133420,b2763a0f933c6d87,local://tools/blender_build_m1_models.py,True
+assets/models/troops/thesis_breaker_lod1.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,72720,09a0e89adbb44246,local://tools/blender_build_m1_models.py,True
+assets/models/troops/thesis_breaker_lod2.glb,Blender 5.3.0 Clean-Room M1 Architecture,CC0-1.0,40852,90cd56e09a19fc50,local://tools/blender_build_m1_models.py,True
+assets/textures/pbr/bronze_albedo.jpg,PolyHaven - rusty_metal_02,CC0-1.0,564932,adaf094391518b6a,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_diff_1k.jpg,True
+assets/textures/pbr/bronze_normal.jpg,PolyHaven - rusty_metal_02,CC0-1.0,403156,995197a62cac6fbb,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_nor_gl_1k.jpg,True
+assets/textures/pbr/bronze_orm.jpg,PolyHaven - rusty_metal_02,CC0-1.0,153031,2982943ffe3273a6,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/rusty_metal_02_arm_1k.jpg,True
+assets/textures/pbr/cobble_albedo.jpg,PolyHaven - cobblestone_floor_04,CC0-1.0,575440,b0662eaec38a2056,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_04/cobblestone_floor_04_diff_1k.jpg,True
+assets/textures/pbr/cobble_normal.jpg,PolyHaven - cobblestone_floor_04,CC0-1.0,781854,a5c71dffb3f25b8b,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_04/cobblestone_floor_04_nor_gl_1k.jpg,True
+assets/textures/pbr/cobble_orm.jpg,PolyHaven - cobblestone_floor_04,CC0-1.0,233474,ad52fe50a0f756f9,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/cobblestone_floor_04/cobblestone_floor_04_arm_1k.jpg,True
+assets/textures/pbr/grass_albedo.jpg,PolyHaven - grass_path_2,CC0-1.0,716010,7f30b163739435c1,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_path_2/grass_path_2_diff_1k.jpg,True
+assets/textures/pbr/grass_normal.jpg,PolyHaven - grass_path_2,CC0-1.0,831959,4f6e911619d4c79a,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_path_2/grass_path_2_nor_gl_1k.jpg,True
+assets/textures/pbr/grass_orm.jpg,PolyHaven - grass_path_2,CC0-1.0,201977,0fd19818f13c18ef,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/grass_path_2/grass_path_2_arm_1k.jpg,True
+assets/textures/pbr/metal_albedo.jpg,PolyHaven - metal_plate,CC0-1.0,692234,c6b6739eac2c75cc,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_diff_1k.jpg,True
+assets/textures/pbr/metal_normal.jpg,PolyHaven - metal_plate,CC0-1.0,770307,994f851a84d52b51,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_nor_gl_1k.jpg,True
+assets/textures/pbr/metal_orm.jpg,PolyHaven - metal_plate,CC0-1.0,1004043,fc4708b6700a2cc3,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/metal_plate_arm_1k.jpg,True
+assets/textures/pbr/rock_albedo.jpg,PolyHaven - rock_boulder_dry,CC0-1.0,859211,20f653a42fb24f42,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_boulder_dry/rock_boulder_dry_diff_1k.jpg,True
+assets/textures/pbr/rock_normal.jpg,PolyHaven - rock_boulder_dry,CC0-1.0,802497,5915fea28a97357c,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_boulder_dry/rock_boulder_dry_nor_gl_1k.jpg,True
+assets/textures/pbr/rock_orm.jpg,PolyHaven - rock_boulder_dry,CC0-1.0,784728,350d01c63afc01cd,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rock_boulder_dry/rock_boulder_dry_arm_1k.jpg,True
+assets/textures/pbr/sand_albedo.jpg,PolyHaven - coast_sand_01,CC0-1.0,960614,58af2e40100f7f40,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/coast_sand_01/coast_sand_01_diff_1k.jpg,True
+assets/textures/pbr/sand_normal.jpg,PolyHaven - coast_sand_01,CC0-1.0,1146826,fe4d045aec99e71e,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/coast_sand_01/coast_sand_01_nor_gl_1k.jpg,True
+assets/textures/pbr/sand_orm.jpg,PolyHaven - coast_sand_01,CC0-1.0,662421,eeb552fb26de45ae,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/coast_sand_01/coast_sand_01_arm_1k.jpg,True
+assets/textures/pbr/slate_albedo.jpg,PolyHaven - roof_slates_02,CC0-1.0,515626,de3d2729ab385c5f,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_02/roof_slates_02_diff_1k.jpg,True
+assets/textures/pbr/slate_normal.jpg,PolyHaven - roof_slates_02,CC0-1.0,763206,32be0c0ba1565856,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_02/roof_slates_02_nor_gl_1k.jpg,True
+assets/textures/pbr/slate_orm.jpg,PolyHaven - roof_slates_02,CC0-1.0,224234,a43d670bb04a70d3,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/roof_slates_02/roof_slates_02_arm_1k.jpg,True
+assets/textures/pbr/stone_albedo.jpg,PolyHaven - medieval_blocks_05,CC0-1.0,653290,dbaf760ed384c220,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_05/medieval_blocks_05_diff_1k.jpg,True
+assets/textures/pbr/stone_normal.jpg,PolyHaven - medieval_blocks_05,CC0-1.0,1167772,f8cf72d17b2f15b9,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_05/medieval_blocks_05_nor_gl_1k.jpg,True
+assets/textures/pbr/stone_orm.jpg,PolyHaven - medieval_blocks_05,CC0-1.0,188538,4c4b918f1126d759,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/medieval_blocks_05/medieval_blocks_05_arm_1k.jpg,True
+assets/textures/pbr/terracotta_albedo.jpg,PolyHaven - clay_roof_tiles_02,CC0-1.0,903929,227a062b38b170e0,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/clay_roof_tiles_02/clay_roof_tiles_02_diff_1k.jpg,True
+assets/textures/pbr/terracotta_normal.jpg,PolyHaven - clay_roof_tiles_02,CC0-1.0,990101,1548d3ebce335a45,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/clay_roof_tiles_02/clay_roof_tiles_02_nor_gl_1k.jpg,True
+assets/textures/pbr/terracotta_orm.jpg,PolyHaven - clay_roof_tiles_02,CC0-1.0,564611,da94d4ce78607c4c,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/clay_roof_tiles_02/clay_roof_tiles_02_arm_1k.jpg,True
+assets/textures/pbr/water_normal.png,Procedural Seamless Wave Normal (PIL/NumPy),CC0-1.0,147949,2a662abba14bed92,local://procedural_wave_normal,True
+assets/textures/pbr/wood_albedo.jpg,PolyHaven - wood_planks_grey,CC0-1.0,228279,d758be23e8fe7bfb,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks_grey/wood_planks_grey_diff_1k.jpg,True
+assets/textures/pbr/wood_normal.jpg,PolyHaven - wood_planks_grey,CC0-1.0,157419,5e570e57d688b016,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks_grey/wood_planks_grey_nor_gl_1k.jpg,True
+assets/textures/pbr/wood_orm.jpg,PolyHaven - wood_planks_grey,CC0-1.0,155198,0464853147811dd6,https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wood_planks_grey/wood_planks_grey_arm_1k.jpg,True

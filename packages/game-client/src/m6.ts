@@ -1,3 +1,15 @@
+import {
+  claimBossChestLive,
+  getEconomy,
+  getLeagueBracket,
+  listBosses,
+  rolloverLeague,
+  scanRaidTargets,
+  setRaidOptIn,
+  startAndSettleRaid,
+  strikeBossLive,
+  type RaidCandidateApi,
+} from './api.js';
 import type { EvaluateJsonFn } from './controller.js';
 
 export type M6TabKey = 'RAIDS' | 'LEAGUES' | 'BOSSES' | 'CLANS';
@@ -55,8 +67,24 @@ export interface M6OperationsState {
 
 export interface M6OperationsController {
   getState(): M6OperationsState;
+  setLiveCourse(courseId: string | null): Promise<void>;
+  refreshLiveState(): Promise<void>;
   setTab(tab: M6TabKey): void;
   destroy(): void;
+}
+
+function currentIsoWeekKey(): string {
+  const now = new Date();
+  const date = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  const weekNo = Math.ceil(
+    ((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7,
+  );
+  return `${date.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
 }
 
 export function createInitialM6State(): M6OperationsState {
@@ -158,6 +186,10 @@ export function mountM6OperationsPanel(
   evaluateJson: EvaluateJsonFn,
 ): M6OperationsController {
   let state = createInitialM6State();
+  let liveCourseId: string | null = null;
+  let liveBossId: string | null = null;
+  let liveBossStrikeSeq = 0;
+  let liveCandidates: RaidCandidateApi[] = [];
 
   container.innerHTML = `
     <div class="m6-ops-panel" data-testid="m6-ops-panel">
@@ -189,9 +221,115 @@ export function mountM6OperationsPanel(
     `;
   };
 
+  const refreshLiveState = async () => {
+    if (!liveCourseId) return;
+    const courseId = liveCourseId;
+    const weekKey = currentIsoWeekKey();
+    const [econRes, scanRes, bossesRes, leagueRes] = await Promise.allSettled([
+      getEconomy(courseId),
+      setRaidOptIn(courseId, true).then(() => scanRaidTargets(courseId)),
+      listBosses(courseId),
+      getLeagueBracket(courseId, weekKey, state.leagueTier),
+    ]);
+
+    let next = { ...state };
+    if (econRes.status === 'fulfilled') {
+      const bal = econRes.value.balance;
+      if (bal) {
+        next.goldBalance = bal.gold;
+        next.trophyBalance = bal.trophies;
+        next.practiceXpBalance = bal.practice_xp;
+      }
+      if (econRes.value.cosmetics.length > 0) {
+        next.cosmetics = econRes.value.cosmetics.map(c => c.cosmetic_key);
+      }
+    }
+    if (scanRes.status === 'fulfilled' && scanRes.value.candidates.length > 0) {
+      liveCandidates = scanRes.value.candidates;
+      next.sectors = scanRes.value.candidates.map(c => ({
+        defender_user_id: c.defender_user_id,
+        node_id: c.node_id,
+        node_title: c.node_title,
+        tier: c.tier,
+        e_u_ticks: c.e_u_ticks,
+        raid_immune: c.raid_immune,
+        immunity_reason: c.immunity_reason,
+        has_revenge_window: c.has_revenge_window,
+        revenge_age_seconds: 0,
+      }));
+    }
+    if (bossesRes.status === 'fulfilled' && bossesRes.value.bosses.length > 0) {
+      const activeBoss =
+        bossesRes.value.bosses.find(b => b.status === 'ACTIVE') ??
+        bossesRes.value.bosses[0];
+      if (activeBoss) {
+        liveBossId = activeBoss.id;
+        next.bossTitle = activeBoss.title;
+        next.bossMode = activeBoss.mode;
+        next.bossMaxHp = activeBoss.max_hp;
+        next.bossCurrentHp = activeBoss.current_hp;
+        next.bossChestClaimed =
+          next.bossChestClaimed ||
+          (Boolean(activeBoss.cosmetic_reward_key) &&
+            next.cosmetics.includes(activeBoss.cosmetic_reward_key!));
+      }
+    }
+    if (
+      leagueRes.status === 'fulfilled' &&
+      leagueRes.value.standings.length > 0
+    ) {
+      next.leagueStandings = leagueRes.value.standings.map(st => ({
+        user_id: st.user_id,
+        trophies_earned: st.trophies_earned,
+        eligible_mastery_recovery_count: st.eligible_mastery_recovery_count,
+        last_trophy_earned_epoch_ms: Date.parse(st.last_trophy_earned_at) || Date.now(),
+        is_dormant: st.is_dormant,
+        returned_from_dormancy_this_week: st.returned_from_dormancy_this_week,
+        qualifying_sessions_since_return: st.qualifying_sessions_since_return,
+        consecutive_dormant_weeks: st.consecutive_dormant_weeks,
+        ...(st.rollover_outcome ? { outcome: st.rollover_outcome } : {}),
+      }));
+    }
+    state = next;
+    render();
+  };
+
   const handleRaidExecution = (sectorIdx: number, isRevenge: boolean) => {
     const sector = state.sectors[sectorIdx];
     if (!sector) return;
+
+    if (liveCourseId) {
+      const courseId = liveCourseId;
+      const candidate = liveCandidates[sectorIdx];
+      void (async () => {
+        try {
+          const settled = await startAndSettleRaid(courseId, {
+            defenderUserId: sector.defender_user_id,
+            defenderNodeId: sector.node_id,
+            isRevenge,
+            revengeSourceRaidId: candidate?.revenge_source_raid_id ?? null,
+            sandboxSolved: true,
+            drillsPassed: 3,
+            baseScorePoints: 28,
+          });
+          const out = settled.settlement;
+          state = {
+            ...state,
+            selectedSectorIndex: sectorIdx,
+            lastRaidStatus: `${out.status} · +${out.attacker_trophy_gain} trophies · +${out.gold_awarded} gold · Chest: ${out.loot_chest_tier ?? 'NONE'}`,
+          };
+          await refreshLiveState();
+        } catch (err) {
+          state = {
+            ...state,
+            selectedSectorIndex: sectorIdx,
+            lastRaidStatus: `Blocked (${err instanceof Error ? err.message : 'RAID_FAILED'})`,
+          };
+          render();
+        }
+      })();
+      return;
+    }
 
     const targRes = JSON.parse(
       evaluateJson(
@@ -291,6 +429,41 @@ export function mountM6OperationsPanel(
   };
 
   const handleLeagueRollover = () => {
+    if (liveCourseId) {
+      const courseId = liveCourseId;
+      void (async () => {
+        try {
+          const summary = await rolloverLeague(
+            courseId,
+            currentIsoWeekKey(),
+            state.leagueTier,
+          );
+          const outcomeByUser = new Map<string, string>();
+          for (const st of summary.standings) {
+            if (st.rollover_outcome) {
+              outcomeByUser.set(st.user_id, st.rollover_outcome);
+            }
+          }
+          state = {
+            ...state,
+            leagueStandings: state.leagueStandings.map(entry => ({
+              ...entry,
+              outcome: outcomeByUser.get(entry.user_id) ?? entry.outcome ?? 'HELD',
+            })),
+            lastRolloverSummary: `Live Rollover · Ranked=${summary.outcome.ranked_count ?? 0} · PromoSlots=${summary.outcome.max_promo_slots ?? 0}`,
+          };
+          render();
+        } catch (err) {
+          state = {
+            ...state,
+            lastRolloverSummary: `Rollover failed: ${err instanceof Error ? err.message : 'ERROR'}`,
+          };
+          render();
+        }
+      })();
+      return;
+    }
+
     const res = JSON.parse(
       evaluateJson(
         JSON.stringify({
@@ -321,6 +494,32 @@ export function mountM6OperationsPanel(
 
   const handleBossStrike = (overcharged: boolean) => {
     if (state.bossCurrentHp <= 0) return;
+    if (liveCourseId && liveBossId) {
+      const courseId = liveCourseId;
+      const bossId = liveBossId;
+      liveBossStrikeSeq += 1;
+      const seq = liveBossStrikeSeq;
+      void (async () => {
+        try {
+          const res = await strikeBossLive(courseId, bossId, {
+            sequence: seq,
+            rating: overcharged ? 4 : 3,
+            overcharged,
+            baseDamage: 100,
+          });
+          state = {
+            ...state,
+            bossCurrentHp: res.strike.boss_hp_after,
+            bossOverkillLast: res.strike.overkill_damage,
+          };
+          render();
+        } catch {
+          await refreshLiveState();
+        }
+      })();
+      return;
+    }
+
     const res = JSON.parse(
       evaluateJson(
         JSON.stringify({
@@ -346,6 +545,28 @@ export function mountM6OperationsPanel(
 
   const handleBossClaim = () => {
     if (state.bossCurrentHp > 0 || state.bossChestClaimed) return;
+    if (liveCourseId && liveBossId) {
+      const courseId = liveCourseId;
+      const bossId = liveBossId;
+      void (async () => {
+        try {
+          const res = await claimBossChestLive(courseId, bossId);
+          state = {
+            ...state,
+            bossChestClaimed: true,
+            cosmetics:
+              res.claim.cosmetic_key && !state.cosmetics.includes(res.claim.cosmetic_key)
+                ? [...state.cosmetics, res.claim.cosmetic_key]
+                : state.cosmetics,
+          };
+          await refreshLiveState();
+        } catch {
+          render();
+        }
+      })();
+      return;
+    }
+
     state = {
       ...state,
       bossChestClaimed: true,
@@ -523,6 +744,17 @@ export function mountM6OperationsPanel(
 
   return {
     getState: () => state,
+    setLiveCourse: async (courseId: string | null) => {
+      liveCourseId = courseId;
+      liveBossId = null;
+      liveCandidates = [];
+      if (courseId) {
+        await refreshLiveState();
+      } else {
+        render();
+      }
+    },
+    refreshLiveState,
     setTab: (tab: M6TabKey) => {
       state = { ...state, activeTab: tab };
       render();

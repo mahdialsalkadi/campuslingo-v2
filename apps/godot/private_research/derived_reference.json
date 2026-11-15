@@ -1,0 +1,72 @@
+{
+  "generated_utc": "2026-11-14T20:49:58.356204+00:00",
+  "unit_scale": {
+    "reference_unit_mm": 7.8125,
+    "cell_size_m": 1.5,
+    "subunits_per_cell": 192,
+    "grid_cells": 40,
+    "arena_meters": 60.0
+  },
+  "binary_inspection": {
+    "binary_present": true,
+    "path": "/home/mahdi/campuslingo-v2/target/debug/campuslingo-server",
+    "binary_bytes": 28882264,
+    "nm_returncode": 0,
+    "total_symbol_hits": 59,
+    "verified_domain_symbols": [
+      "compute_clan_stability_points",
+      "evaluate_boss_strike",
+      "evaluate_league_rollover",
+      "evaluate_raid_settlement",
+      "evaluate_raid_targetability",
+      "split_protection_predicates"
+    ]
+  },
+  "troop_kinematics": {
+    "squire_footman": {
+      "top_speed_mps": 2.7,
+      "time_to_90pct_s": 0.483,
+      "braking_decel_mps2": 28.1,
+      "turn_rate_deg_s": 337.5
+    },
+    "lexi_archer": {
+      "top_speed_mps": 2.85,
+      "time_to_90pct_s": 0.517,
+      "braking_decel_mps2": 28.1,
+      "turn_rate_deg_s": 337.5
+    },
+    "thesis_breaker": {
+      "top_speed_mps": 3.6,
+      "time_to_90pct_s": 0.65,
+      "braking_decel_mps2": 28.1,
+      "turn_rate_deg_s": 337.5
+    },
+    "formula_giant": {
+      "top_speed_mps": 1.65,
+      "time_to_90pct_s": 0.3,
+      "braking_decel_mps2": 28.1,
+      "turn_rate_deg_s": 337.5
+    },
+    "glyph_drake": {
+      "top_speed_mps": 2.1,
+      "time_to_90pct_s": 0.383,
+      "braking_decel_mps2": 28.1,
+      "turn_rate_deg_s": 337.5
+    }
+  },
+  "mortar_shell_arc": {
+    "launch_vy_mps": 10.31,
+    "gravity_mps2": -28.12,
+    "discrete_correction_mps": 0.7,
+    "measured_60hz_apex_m": 1.804,
+    "uncorrected_apex_m": 1.642,
+    "flight_time_s": 0.717
+  },
+  "simulation_rates": {
+    "reference_rts_hz": 10,
+    "godot_combat_hz": 20,
+    "godot_visual_hz": 60,
+    "half_tick_phase_offset_ratio": 0.5,
+    "cannon_brownout_20s_dmg": 312.0
+  }
+}

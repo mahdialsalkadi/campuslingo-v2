@@ -1,0 +1,103 @@
+[gd_scene load_steps=14 format=3 uid="uid://maingamevillage"]
+
+[ext_resource type="Script" path="res://scripts/main_village.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://c8g02islandbrd" path="res://scenes/village/IslandBoard.tscn" id="2_board"]
+[ext_resource type="Script" path="res://scripts/fx/combat_build_particles.gd" id="3_vfx"]
+[ext_resource type="Script" path="res://scripts/village/build_drag_placement.gd" id="4_drag"]
+[ext_resource type="Script" path="res://scripts/net/auth_courses_api.gd" id="5_auth"]
+[ext_resource type="Script" path="res://scripts/net/village_study_api.gd" id="6_study"]
+[ext_resource type="Script" path="res://scripts/net/raids_duels_api.gd" id="7_raids"]
+[ext_resource type="Script" path="res://scripts/modes/pvp_raid_controller.gd" id="8_pvp"]
+[ext_resource type="Script" path="res://scripts/modes/boss_raid_controller.gd" id="9_boss"]
+[ext_resource type="Script" path="res://scripts/modes/live_duel_controller.gd" id="10_duel"]
+[ext_resource type="Script" path="res://scripts/village/camera_pan_zoom.gd" id="11_cam"]
+[ext_resource type="PackedScene" uid="uid://campushudscene" path="res://scenes/ui/CampusHUD.tscn" id="12_hud"]
+[ext_resource type="Script" path="res://scripts/ui/section_debug_inspector.gd" id="13_insp"]
+
+[node name="MainGame" type="Node3D"]
+script = ExtResource("1_main")
+
+[node name="IslandBoard" parent="." instance=ExtResource("2_board")]
+
+[node name="CombatBuildParticles" type="Node3D" parent="."]
+script = ExtResource("3_vfx")
+
+[node name="BuildDragPlacement" type="Node3D" parent="."]
+script = ExtResource("4_drag")
+
+[node name="WallBatches" type="Node3D" parent="."]
+
+[node name="Buildings" type="Node3D" parent="."]
+
+[node name="Troops" type="Node3D" parent="."]
+
+[node name="Services" type="Node" parent="."]
+
+[node name="AuthCoursesAPI" type="Node" parent="Services"]
+script = ExtResource("5_auth")
+
+[node name="VillageStudyAPI" type="Node" parent="Services"]
+script = ExtResource("6_study")
+
+[node name="RaidsDuelsAPI" type="Node" parent="Services"]
+script = ExtResource("7_raids")
+
+[node name="PvpRaidController" type="Node" parent="Services"]
+script = ExtResource("8_pvp")
+
+[node name="BossRaidController" type="Node" parent="Services"]
+script = ExtResource("9_boss")
+
+[node name="LiveDuelController" type="Node" parent="Services"]
+script = ExtResource("10_duel")
+
+[node name="CameraPanZoom" type="Camera3D" parent="."]
+transform = Transform3D(0.74314, -0.44774, 0.49726, 0, 0.74314, 0.66913, -0.66913, -0.49726, 0.55226, 25.8576, 35.1948, 28.7177)
+projection = 1
+current = true
+size = 34.0
+near = 0.5
+far = 240.0
+script = ExtResource("11_cam")
+
+[node name="StoryCam_A" type="Camera3D" parent="."]
+transform = Transform3D(0.74314, -0.44774, 0.49726, 0, 0.74314, 0.66913, -0.66913, -0.49726, 0.55226, 25.8576, 35.1948, 28.7177)
+projection = 1
+size = 34.0
+near = 0.5
+far = 240.0
+
+[node name="StoryCam_B" type="Camera3D" parent="."]
+transform = Transform3D(0.80902, -0.31148, 0.49847, 0, 0.84805, 0.52992, -0.58779, -0.42871, 0.68609, 17.5449, 20.4271, 24.2991)
+projection = 1
+size = 11.5
+near = 0.5
+far = 240.0
+
+[node name="StoryCam_C" type="Camera3D" parent="."]
+transform = Transform3D(0.78801, 0.37904, -0.48515, 0, 0.78801, 0.61566, 0.61566, -0.48515, 0.62096, -18.2356, 24.2951, 25.3965)
+projection = 1
+size = 14.5
+near = 0.5
+far = 240.0
+
+[node name="StoryCam_D" type="Camera3D" parent="."]
+transform = Transform3D(0.70711, -0.52548, 0.47315, 0, 0.66913, 0.74314, -0.70711, -0.52548, 0.47315, 30.2814, 47.5613, 30.2814)
+projection = 1
+size = 54.0
+near = 0.5
+far = 240.0
+
+[node name="HudCanvas" type="CanvasLayer" parent="."]
+
+[node name="CampusHUD" parent="HudCanvas" instance=ExtResource("12_hud")]
+
+[node name="SectionDebugInspector" type="Control" parent="HudCanvas"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("13_insp")

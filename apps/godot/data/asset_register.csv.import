@@ -1,0 +1,17 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://c86inuqjygecj"
+
+[deps]
+
+files=["res://data/asset_register.pack.translation", "res://data/asset_register.license.translation", "res://data/asset_register.bytes.translation", "res://data/asset_register.sha256.translation", "res://data/asset_register.source.translation", "res://data/asset_register.magic.translation"]
+
+source_file="res://data/asset_register.csv"
+dest_files=["res://data/asset_register.pack.translation", "res://data/asset_register.license.translation", "res://data/asset_register.bytes.translation", "res://data/asset_register.sha256.translation", "res://data/asset_register.source.translation", "res://data/asset_register.magic.translation"]
+
+[params]
+
+compress=true
+delimiter=0

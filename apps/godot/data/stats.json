@@ -1,0 +1,14 @@
+{
+  "checks": {
+    "astar_detour": true,
+    "breaker_wall": true,
+    "brownout_dps": true,
+    "mortar_apex": true,
+    "mortar_deadzone": true,
+    "tesla_reveal": true,
+    "troop_ramp": true
+  },
+  "passed": 7,
+  "section": "M1_COMBAT_LAB",
+  "total": 7
+}

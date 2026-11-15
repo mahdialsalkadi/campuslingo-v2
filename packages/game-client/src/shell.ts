@@ -31,6 +31,17 @@ import { Fortress3DScene, type Scene3DTelemetry } from './scene3d.js';
 import { mountDuelArenaPanel } from './duel.js';
 import { mountM6OperationsPanel } from './m6.js';
 import { mountM7PwaRtlPanel, renderMixedArabicMathHtml } from './m7_pwa_rtl.js';
+import {
+  enrollCourse,
+  getCourseFortress,
+  getMe,
+  listCourses,
+  loginOrRegisterDemo,
+  logout,
+  recomputeCourseShields,
+  reportNodeContent,
+  type CourseShieldDashboardApi,
+} from './api.js';
 
 export type ShellMode = '3D_ACTIVE' | 'MANUAL_2D' | 'AUTO_FALLBACK_2D';
 
@@ -61,6 +72,9 @@ export interface ShellTelemetrySnapshot {
   parameterValues: Record<string, number>;
   reportCountForNode: number;
   quarantinedForNode: boolean;
+  liveConnected: boolean;
+  liveCourseId: string | null;
+  liveUserId: string | null;
   telemetry: Scene3DTelemetry | null;
 }
 
@@ -72,6 +86,52 @@ const ARCHETYPES: readonly Archetype[] = [
   'TRAP',
   'AXIOM',
 ];
+
+function mapDashboardToFortress(
+  dashboard: CourseShieldDashboardApi,
+): FortressStateModel {
+  const nodes: FortressNodeModel[] = dashboard.nodes.map((node, index) => {
+    const rawArch = node.archetype as Archetype | null;
+    const archetype: Archetype =
+      rawArch && ARCHETYPES.includes(rawArch) ? rawArch : 'PIPELINE';
+    const mods = ARCHETYPE_MODIFIERS[archetype];
+    const modifier =
+      node.modifier && mods.includes(node.modifier as never)
+        ? node.modifier
+        : mods[0]!;
+    const rawTier = node.shield?.tier ?? 1;
+    const tier: 0 | 1 | 2 | 3 =
+      rawTier === 0 || rawTier === 1 || rawTier === 2 || rawTier === 3
+        ? rawTier
+        : 1;
+    return {
+      node_id: node.node_id,
+      title: node.title,
+      grid_x: node.grid_x ?? (index % 3) * 2,
+      grid_y: node.grid_y ?? Math.floor(index / 3) * 2,
+      tier,
+      state: node.shield?.state === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
+      i_u_ticks: node.shield?.i_u_ticks ?? null,
+      e_u_ticks: node.shield?.e_u_ticks ?? null,
+      is_brownout: Boolean(node.shield?.is_brownout),
+      raid_immune: Boolean(node.shield?.raid_immune),
+      propagation_exempt: Boolean(node.shield?.propagation_exempt),
+      protection_reasons: node.shield?.active_protections ?? [],
+      archetype,
+      modifier,
+    };
+  });
+  const edges = dashboard.edges.map(edge => ({
+    prerequisite_node_id: edge.prerequisite_node_id,
+    dependent_node_id: edge.dependent_node_id,
+    weight: edge.weight,
+  }));
+  return {
+    course_id: dashboard.course_id,
+    nodes,
+    edges,
+  };
+}
 
 function createFallbackEvaluator(): EvaluateJsonFn {
   return (rawJson: string): string => {
@@ -173,6 +233,10 @@ export async function mountM4GameShell(root: HTMLElement): Promise<PlayableShell
   let quickBlitzStep = 0;
   let stressLowFps = false;
   let latestTelemetry: Scene3DTelemetry | null = null;
+  let liveConnected = false;
+  let liveCourseId: string | null = null;
+  let liveUserId: string | null = null;
+  let liveContentVersionId: string | null = null;
   const nodeReports = new Map<string, number>();
 
   root.innerHTML = `
@@ -184,6 +248,9 @@ export async function mountM4GameShell(root: HTMLElement): Promise<PlayableShell
       <div class="m4-toolbar">
         <div class="m4-theme-group" role="group" aria-label="World Theme Selector"></div>
         <div class="m4-mode-group">
+          <span class="badge-chip" id="m4-live-badge" data-testid="m4-live-badge">OFFLINE DEMO</span>
+          <button type="button" class="touch-btn accent-btn" id="m4-live-connect-btn" data-testid="m4-live-connect-btn">Connect Live Server</button>
+          <button type="button" class="touch-btn" id="m4-recompute-shields-btn" data-testid="m4-recompute-shields-btn">Recompute Shields</button>
           <button type="button" class="touch-btn" id="m4-focus-toggle" data-testid="m4-focus-toggle">Focus: Hologram</button>
           <button type="button" class="touch-btn" id="m4-fallback-toggle" data-testid="m4-fallback-toggle">Mode: 3D WebGL</button>
           <button type="button" class="touch-btn" id="m4-stress-fps-btn" data-testid="m4-stress-fps-btn">Simulate &lt;28 FPS</button>
@@ -260,6 +327,9 @@ export async function mountM4GameShell(root: HTMLElement): Promise<PlayableShell
   const stage2dEl = root.querySelector<HTMLElement>('#m4-2d-stage')!;
   const audioEl = root.querySelector<HTMLAudioElement>('#m4-opus-player')!;
   const titleEl = root.querySelector<HTMLElement>('#m4-shell-title')!;
+  const liveBadgeEl = root.querySelector<HTMLElement>('#m4-live-badge')!;
+  const liveConnectBtn = root.querySelector<HTMLButtonElement>('#m4-live-connect-btn')!;
+  const recomputeShieldsBtn = root.querySelector<HTMLButtonElement>('#m4-recompute-shields-btn')!;
   const focusToggleBtn = root.querySelector<HTMLButtonElement>('#m4-focus-toggle')!;
   const fallbackToggleBtn = root.querySelector<HTMLButtonElement>('#m4-fallback-toggle')!;
   const stressFpsBtn = root.querySelector<HTMLButtonElement>('#m4-stress-fps-btn')!;
@@ -343,6 +413,9 @@ export async function mountM4GameShell(root: HTMLElement): Promise<PlayableShell
     hudModeEl.textContent = mode;
     focusToggleBtn.textContent = cameraFocusMode === 'hologram' ? 'Focus: Hologram' : 'Focus: Fortress';
     stressFpsBtn.setAttribute('aria-pressed', stressLowFps ? 'true' : 'false');
+    liveBadgeEl.textContent = liveConnected ? 'LIVE SERVER' : 'OFFLINE DEMO';
+    liveBadgeEl.className = liveConnected ? 'badge-chip badge-safe' : 'badge-chip';
+    liveConnectBtn.textContent = liveConnected ? 'Disconnect Live' : 'Connect Live Server';
     stressFpsBtn.textContent = stressLowFps ? 'Stop <28 FPS Stress' : 'Simulate <28 FPS';
 
     // Node summary + protection badges
@@ -468,6 +541,9 @@ export async function mountM4GameShell(root: HTMLElement): Promise<PlayableShell
       parameterValues: { ...parameterValues },
       reportCountForNode: nodeReports.get(selectedNodeId) ?? 0,
       quarantinedForNode: (nodeReports.get(selectedNodeId) ?? 0) >= 3,
+      liveConnected,
+      liveCourseId,
+      liveUserId,
       telemetry: latestTelemetry,
     };
     if (!windowShellHandle) {
@@ -735,16 +811,135 @@ export async function mountM4GameShell(root: HTMLElement): Promise<PlayableShell
     selectArchetypeModifier(targetPreset.archetype, targetPreset.modifier);
   });
 
+  const duelPanel = mountDuelArenaPanel(duelMountEl, evaluateJson);
+  const m6Panel = mountM6OperationsPanel(m6MountEl, evaluateJson);
+  const m7Panel = mountM7PwaRtlPanel(m7MountEl);
+
+  const applyLiveDashboard = (dashboard: CourseShieldDashboardApi) => {
+    liveContentVersionId = dashboard.active_content_version_id;
+    const mapped = mapDashboardToFortress(dashboard);
+    if (mapped.nodes.length > 0) {
+      fortress = mapped;
+      if (!fortress.nodes.some(n => n.node_id === selectedNodeId)) {
+        selectedNodeId = fortress.nodes[0]!.node_id;
+        preset = findHologramPreset(
+          fortress.nodes[0]!.archetype,
+          fortress.nodes[0]!.modifier,
+        );
+        parameterValues = Object.fromEntries(
+          preset.sandbox.parameters.map(p => [p.name, p.initial]),
+        );
+        renderSliders();
+      }
+      renderNodeButtons();
+    }
+  };
+
+  const hydrateLiveSession = async (userId: string) => {
+    const courses = await listCourses();
+    const targetCourse =
+      courses.find(
+        c =>
+          c.published !== false &&
+          (c.id === '00000000-0000-4000-8000-000000000201' ||
+            c.name === 'Linear Systems & Hologram Citadel'),
+      ) ??
+      courses.find(c => c.published !== false) ??
+      courses[0];
+    if (!targetCourse) {
+      throw new Error('No courses available on live server');
+    }
+    try {
+      await enrollCourse(targetCourse.id);
+    } catch {
+      // Already enrolled or enrollment optional
+    }
+    const dashboard = await getCourseFortress(targetCourse.id);
+    liveUserId = userId;
+    liveCourseId = targetCourse.id;
+    liveConnected = true;
+    applyLiveDashboard(dashboard);
+    duelPanel.setLiveCourse(targetCourse.id);
+    await m6Panel.setLiveCourse(targetCourse.id);
+    syncAll();
+  };
+
+  const disconnectLiveSession = async () => {
+    try {
+      await logout();
+    } catch {
+      // Ignore network errors on logout
+    }
+    liveConnected = false;
+    liveUserId = null;
+    liveCourseId = null;
+    liveContentVersionId = null;
+    duelPanel.setLiveCourse(null);
+    await m6Panel.setLiveCourse(null);
+    fortress = {
+      course_id: DEFAULT_FORTRESS_STATE.course_id,
+      nodes: DEFAULT_FORTRESS_STATE.nodes.map(n => ({ ...n })),
+      edges: DEFAULT_FORTRESS_STATE.edges.map(e => ({ ...e })),
+    };
+    selectedNodeId = fortress.nodes[0]!.node_id;
+    renderNodeButtons();
+    syncAll();
+  };
+
+  liveConnectBtn.addEventListener('click', () => {
+    if (liveConnected) {
+      void disconnectLiveSession();
+      return;
+    }
+    liveConnectBtn.textContent = 'Connecting...';
+    void (async () => {
+      try {
+        const user = await loginOrRegisterDemo(
+          'student@campuslingo.local',
+          'CampusLingo#2026!',
+        );
+        await hydrateLiveSession(user.user_id);
+      } catch {
+        liveBadgeEl.textContent = 'CONNECT FAILED';
+        liveBadgeEl.className = 'badge-chip badge-warn';
+        liveConnectBtn.textContent = 'Connect Live Server';
+      }
+    })();
+  });
+
+  recomputeShieldsBtn.addEventListener('click', () => {
+    if (!liveCourseId) {
+      syncAll();
+      return;
+    }
+    const courseId = liveCourseId;
+    void (async () => {
+      try {
+        const dashboard = await recomputeCourseShields(courseId);
+        applyLiveDashboard(dashboard);
+        await m6Panel.refreshLiveState();
+        syncAll();
+      } catch {
+        // Keep current state if transient error
+      }
+    })();
+  });
+
   reportBtn.addEventListener('click', () => {
     const prev = nodeReports.get(selectedNodeId) ?? 0;
     const nextCount = prev + 1;
     nodeReports.set(selectedNodeId, nextCount);
+    if (liveCourseId) {
+      void reportNodeContent(
+        liveCourseId,
+        selectedNodeId,
+        'BROKEN_QUESTION',
+        'Reported from live shell',
+        liveContentVersionId,
+      ).catch(() => {});
+    }
     syncAll();
   });
-
-  const duelPanel = mountDuelArenaPanel(duelMountEl, evaluateJson);
-  const m6Panel = mountM6OperationsPanel(m6MountEl, evaluateJson);
-  const m7Panel = mountM7PwaRtlPanel(m7MountEl);
 
   const onResize = () => scene3d?.resize();
   const destroy = () => {
@@ -818,6 +1013,9 @@ export async function mountM4GameShell(root: HTMLElement): Promise<PlayableShell
 
   window.addEventListener('resize', onResize);
   syncAll();
+  void getMe()
+    .then(user => (user ? hydrateLiveSession(user.user_id) : undefined))
+    .catch(() => {});
 
   return { destroy, setTheme, selectArchetypeModifier, selectNode, getSnapshot: () => (window as unknown as { __CAMPUSLINGO_SHELL__: { snapshot: ShellTelemetrySnapshot } }).__CAMPUSLINGO_SHELL__.snapshot };
 }

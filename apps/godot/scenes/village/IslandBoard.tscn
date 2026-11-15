@@ -1,0 +1,49 @@
+[gd_scene load_steps=5 format=3 uid="uid://c8g02islandbrd"]
+
+[ext_resource type="Script" path="res://scripts/village/grid_board_renderer.gd" id="1_g02"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_island"]
+size = Vector3(68, 2, 68)
+subdivide_width = 16
+subdivide_height = 2
+subdivide_depth = 16
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_water"]
+size = Vector2(200, 200)
+subdivide_width = 8
+subdivide_depth = 8
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_edit"]
+size = Vector2(60, 60)
+
+[node name="IslandBoard" type="Node3D"]
+script = ExtResource("1_g02")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="SunLight" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.37461, -0.73063, 0.57083, 0, 0.61566, 0.78801, -0.92718, -0.29519, 0.23063, 0, 26, 0)
+shadow_enabled = true
+
+[node name="IslandPlateau" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+mesh = SubResource("BoxMesh_island")
+
+[node name="WaterMoat" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.15, 0)
+mesh = SubResource("PlaneMesh_water")
+
+[node name="EditGridOverlay" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, 0)
+visible = false
+cast_shadow = 0
+mesh = SubResource("PlaneMesh_edit")
+
+[node name="PineForestBatch" type="MultiMeshInstance3D" parent="."]
+
+[node name="PineShadowBatch" type="MultiMeshInstance3D" parent="."]
+cast_shadow = 0
+
+[node name="BoulderBatch" type="MultiMeshInstance3D" parent="."]
+
+[node name="CliffRimBatch" type="MultiMeshInstance3D" parent="."]

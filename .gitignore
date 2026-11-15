@@ -31,3 +31,9 @@ target/
 packages/engine/generated/
 packages/game-client/public/controller.js
 packages/game-client/public/shell.js
+
+# Godot local import cache, stale Docs .import files, and compiled build binaries (published via GitHub Releases)
+apps/godot/.godot/
+apps/godot/Docs/**/*.import
+apps/godot/builds/CampusLingoVillageClash.x86_64
+apps/godot/builds/web/

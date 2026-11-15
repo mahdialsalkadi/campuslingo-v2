@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="VillageProfile" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/village_profile.gd" id="1_vp"]
+
+[resource]
+script = ExtResource("1_vp")
+sim_tick_hz = 20.0
+shot_phase_offset_ratio = 0.5
+mortar_launch_vy_mps = 10.31
+mortar_gravity_mps2 = 28.12
+accel_start_mps2 = 7.73
+accel_top_taper_mps2 = 2.5
+braking_decel_mps2 = 28.1
+turn_rate_deg_s = 337.5
+camera_pitch_deg = -45.0
+camera_yaw_deg = 45.0
+camera_zoom_default_m = 34.0
+camera_pan_damping = 8.0

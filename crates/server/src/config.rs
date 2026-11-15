@@ -9,6 +9,8 @@ pub struct Settings {
     pub allowed_origin: Option<String>,
     pub recovery_key: Option<RecoveryKey>,
     pub asset_dir: PathBuf,
+    pub web_dir: PathBuf,
+    pub wasm_dir: PathBuf,
 }
 
 fn env_bool(name: &str) -> bool {
@@ -40,6 +42,12 @@ impl Settings {
             asset_dir: std::env::var("CAMPUSLINGO_ASSET_DIR")
                 .map(PathBuf::from)
                 .unwrap_or_else(|_| PathBuf::from("artifacts/private/assets")),
+            web_dir: std::env::var("CAMPUSLINGO_WEB_DIR")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("packages/game-client/public")),
+            wasm_dir: std::env::var("CAMPUSLINGO_WASM_DIR")
+                .map(PathBuf::from)
+                .unwrap_or_else(|_| PathBuf::from("packages/engine/generated")),
         })
     }
 
